@@ -1,92 +1,115 @@
 // src/app/api/auth/verify-otp/route.js
 import { NextResponse } from "next/server";
-import { SignJWT } from "jose";
-//model
-import User from "@/models/User";
-//utils
-import connectDB from "@/utils/connectDB";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "please_set_secret"
-);
+import db from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { normalizePhone } from "@/lib/phone";
+import { signToken } from "@/lib/jwt";
 
 export async function POST(req) {
   try {
-    await connectDB();
+    const { phone: rawPhone, otp } = await req.json();
+    const phone = normalizePhone(rawPhone);
+
+    if (!phone || !otp) {
+      return NextResponse.json(
+        { success: false, message: "phone and otp required" },
+        { status: 400 }
+      );
+    }
+
+    const rows = await db
+      .select()
+      .from(users)
+      .where(eq(users.phone, phone))
+      .limit(1);
+    if (rows.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "کاربر یافت نشد" },
+        { status: 404 }
+      );
+    }
+
+    const user = rows[0];
+
+    if (!user.otp || !user.otpExpire || new Date() > new Date(user.otpExpire)) {
+      return NextResponse.json(
+        { success: false, message: "کد منقضی شده" },
+        { status: 400 }
+      );
+    }
+
+    if (String(user.otp) !== String(otp)) {
+      return NextResponse.json(
+        { success: false, message: "کد اشتباه است" },
+        { status: 400 }
+      );
+    }
+
+    // اگر slug موجود نیست و title هست، بساز
+    let finalSlug = user.slug;
+    if (!finalSlug && user.title) {
+      finalSlug = user.title.trim().toLowerCase().replace(/\s+/g, "-");
+      await db
+        .update(users)
+        .set({ slug: finalSlug })
+        .where(eq(users.phone, phone));
+    }
+
+    // پاک کردن otp و otpExpire
+    await db
+      .update(users)
+      .set({ otp: null, otpExpire: null })
+      .where(eq(users.phone, phone));
+
+    // ساخت JWT
+    const payload = {
+      id: user.id,
+      phone: user.phone,
+      role: user.role || "USER",
+      slug: finalSlug || null,
+    };
+
+    const token = await signToken(payload, { expiresIn: "7d" });
+
+    // تعیین مسیر ریدایرکت بر اساس نقش
+    let redirectPath = "/client"; // پیش‌فرض برای USERها
+
+    if (user.role === "OWNER" && finalSlug) {
+      redirectPath = `/${finalSlug}/panel`;
+    } else if (user.role === "ADMIN") {
+      redirectPath = "/owner"; // یا هر مسیر دیگه برای ادمین
+    }
+
+    const res = NextResponse.json(
+      {
+        success: true,
+        redirect: redirectPath,
+        user: {
+          id: user.id,
+          phone: user.phone,
+          role: user.role,
+          slug: finalSlug,
+        },
+      },
+      { status: 200 }
+    );
+
+    // set cookie
+    res.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return res;
   } catch (err) {
-    console.error("DB connect error:", err);
+    console.error("verify-otp error:", err);
     return NextResponse.json(
-      { status: "failed", message: "DB error" },
+      { success: false, message: "خطا" },
       { status: 500 }
     );
   }
-
-  const { phone: rawPhone, otp } = await req.json();
-  if (!rawPhone || !otp) {
-    return NextResponse.json(
-      { status: "failed", message: "phone and otp required" },
-      { status: 400 }
-    );
-  }
-
-  const phone = rawPhone.replace(/\s+/g, "");
-  const user = await User.findOne({ phone });
-  if (!user) {
-    return NextResponse.json(
-      { status: "failed", message: "کاربر یافت نشد" },
-      { status: 404 }
-    );
-  }
-
-  if (!user.otp || !user.otpExpire || new Date() > user.otpExpire) {
-    return NextResponse.json(
-      { status: "failed", message: "کد منقضی شده" },
-      { status: 400 }
-    );
-  }
-
-  if (user.otp !== String(otp)) {
-    return NextResponse.json(
-      { status: "failed", message: "کد اشتباه است" },
-      { status: 400 }
-    );
-  }
-
-  // پاک کردن OTP
-  user.otp = null;
-  user.otpExpire = null;
-  await user.save();
-
-  // ✅ ایجاد JWT با jose
-  const payload = {
-    sub: user._id.toString(),
-    phone: user.phone,
-    role: (user.role || "USER").toUpperCase(),
-  };
-
-  const token = await new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("7d")
-    .sign(JWT_SECRET);
-
-  console.log("✅ JWT payload:", payload);
-
-  const res = NextResponse.json(
-    {
-      status: "success",
-      message: "ورود موفق",
-      user: { id: user._id, phone: user.phone, role: payload.role },
-    },
-    { status: 200 }
-  );
-
-  res.cookies.set("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 روز
-  });
-
-  return res;
 }

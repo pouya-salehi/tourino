@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { BeatLoader } from "react-spinners";
 import { LogOut } from "lucide-react";
+import { Button } from "../ui/button";
 export default function LogoutBtn() {
   const [loading, setLoading] = useState(false);
 
@@ -12,7 +13,7 @@ export default function LogoutBtn() {
   };
 
   return (
-    <button
+    <Button
       onClick={handleLogout}
       disabled={loading}
       className="flex items-center border-2 border-white rounded-md p-2 font-bold gap-2 cursor-pointer"
@@ -25,6 +26,6 @@ export default function LogoutBtn() {
           خروج از حساب کاربری
         </span>
       )}
-    </button>
+    </Button>
   );
 }

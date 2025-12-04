@@ -1,31 +1,109 @@
 "use client";
+
+import { useState, useRef, useEffect } from "react";
+import { User, LogOut, Settings, LogIn, FileInput } from "lucide-react";
 import Link from "next/link";
-//icons
-import { LogIn } from "lucide-react";
-//auth
 import { useAuth } from "@/context/AuthContext";
-//ui
-import LogoutBtn from "../elements/LogoutBtn";
-function NavAuth() {
-  const { user, logout, loading } = useAuth();
+import { Button } from "../ui/button";
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+export default function UserMenu() {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+
+  const menuRef = useRef();
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/signin";
+  };
+
+  useEffect(() => {
+    function close(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
+
+  const getPanel = () => {
+    if (!user) return "/signin";
+    if (user.role === "client") return "/client";
+    if (user.role === "owner") return `/${user.slug}/panel`;
+    if (user.role === "admin") return "/owner";
+    return "/client";
+  };
+
   return (
-    <div>
-      {user ? (
-        <LogoutBtn loader={loading} signOutHandler={logout} />
-      ) : (
-        <div className="flex gap-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all ease-in px-6 py-4 rounded-lg font-semibold text-white text-lg shadow-xl items-center">
+    <>
+      {!user && (
+        <Button className="flex items-center gap-2">
           <Link href="/signin" className="flex items-center gap-1">
-            <LogIn />
-            <span className="hidden sm:inline">ورود</span>
+            <LogIn size={18} />
+            ورود
           </Link>
           <span className="text-gray-300">|</span>
-          <Link href="/signup" className="text-sm">
+          <Link href="/signup" className="flex items-center gap-1">
+            <FileInput size={18} />
             ثبت نام
           </Link>
-        </div>
+        </Button>
       )}
-    </div>
+
+      <div ref={menuRef}>
+        {user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                className="rounded-full p-4"
+                onClick={() => setOpen((v) => !v)}
+              >
+                <User size={22} />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent open={open} align="end" className="w-64">
+              <div className="flex justify-between items-center px-2">
+                <DropdownMenuLabel>{user.phone}</DropdownMenuLabel>
+                <DropdownMenuLabel className="opacity-70">
+                  {user.role}
+                </DropdownMenuLabel>
+              </div>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuGroup>
+                <DropdownMenuItem>
+                  <Link href={getPanel()} className="flex items-center gap-2">
+                    <Settings size={18} />
+                    حساب کاربری
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem onClick={handleLogout}>
+                <span className="flex gap-2 items-center text-red-600">
+                  <LogOut size={18} />
+                  خروج
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+    </>
   );
 }
-
-export default NavAuth;

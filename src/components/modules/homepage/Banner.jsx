@@ -1,101 +1,133 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Sun, Moon, Volume2, VolumeX } from "lucide-react";
-import FloatingParticles from "./banner/FloatingParticles";
-import BannerHeader from "./banner/BannerHEader";
-import BannerCenter from "./banner/BannerCenter";
-import BannerFeatures from "./banner/BannerFeatures";
+import { DottedMap } from "@/components/ui/dotted-map";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+const markers = [
+  {
+    lat: 35.3219, // سنندج
+    lng: 46.9862,
+    size: 1,
+    title: "Sanandaj",
+  },
+  {
+    lat: 40.7128,
+    lng: -74.006,
+    size: 1,
+    title: "New York",
+  },
+  {
+    lat: 34.0522,
+    lng: -118.2437,
+    size: 1,
+    title: "Los Angeles",
+  },
+  {
+    lat: 51.5074,
+    lng: -0.1278,
+    size: 1,
+    title: "London",
+  },
+  {
+    lat: -33.8688,
+    lng: 151.2093,
+    size: 1,
+    title: "Sydney",
+  },
+  {
+    lat: 48.8566,
+    lng: 2.3522,
+    size: 1,
+    title: "Paris",
+  },
+  {
+    lat: 35.6762,
+    lng: 139.6503,
+    size: 1,
+    title: "Tokyo",
+  },
+  {
+    lat: 55.7558,
+    lng: 37.6176,
+    size: 1,
+    title: "Moscow",
+  },
+  {
+    lat: 39.9042,
+    lng: 116.4074,
+    size: 1,
+    title: "Beijing",
+  },
+  {
+    lat: 28.6139,
+    lng: 77.209,
+    size: 1,
+    title: "New Delhi",
+  },
+  {
+    lat: -23.5505,
+    lng: -46.6333,
+    size: 1,
+    title: "São Paulo",
+  },
+  {
+    lat: 1.3521,
+    lng: 103.8198,
+    size: 1,
+    title: "Singapore",
+  },
+  {
+    lat: 25.2048,
+    lng: 55.2708,
+    size: 1,
+    title: "Dubai",
+  },
+  {
+    lat: 52.52,
+    lng: 13.405,
+    size: 1,
+    title: "Berlin",
+  },
+  {
+    lat: 19.4326,
+    lng: -99.1332,
+    size: 1,
+    title: "Mexico City",
+  },
+  {
+    lat: -26.2041,
+    lng: 28.0473,
+    size: 1,
+    title: "Johannesburg",
+  },
+];
 
-const Banner = () => {
-  const [isNight, setIsNight] = useState(false);
-  const [muted, setMuted] = useState(true);
-  const [time, setTime] = useState(new Date());
-  const bannerRef = useRef();
-
-  // به‌روزرسانی زمان
-  useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 60000);
-    return () => clearInterval(t);
-  }, []);
-
-  const toggleMode = useCallback(() => setIsNight((p) => !p), []);
-  const toggleMute = useCallback((e) => {
-    e.stopPropagation();
-    setMuted((m) => !m);
-  }, []);
-
-  // مسیر عکس‌ها (می‌تونی مسیر رو هرجایی که عکس‌هاتو گذاشتی تغییر بدی)
-  const bgDay = "/images/banner-day.jpg";
-  const bgNight = "/images/banner-night.jpg";
-
-  const CurrentIcon = isNight ? Moon : Sun;
-
-  const content = isNight
-    ? {
-        title: "شب خلاقانه",
-        subtitle: "ایده‌هایت رو در آرامش شب بساز",
-        desc: "با ابزارهای حرفه‌ای ما، در سکوت شب خلاقیتت رو شکوفا کن",
-        cta: "کشف کن",
-        features: ["طراحی خاص", "پشتیبانی ۲۴/۷", "امنیت بالا"],
-      }
-    : {
-        title: "روز پرانرژی",
-        subtitle: "شروعی تازه با انرژی مثبت",
-        desc: "پروژه‌ات رو همین حالا شروع کن و از امکانات ما لذت ببر",
-        cta: "شروع کن",
-        features: ["طراحی مدرن", "سرعت بالا", "رایگان"],
-      };
-
+export default function HeroBanner() {
   return (
-    <section
-      ref={bannerRef}
-      onClick={toggleMode}
-      className="relative w-full h-[90vh] overflow-hidden rounded-3xl cursor-pointer select-none text-white"
-    >
-      {/* پس‌زمینه‌ی تصویر */}
+    <section className="relative w-full h-100 md:h-[750px] flex items-center justify-center overflow-hidden">
+      {/* نقشه در بک‌گراند */}
       <div className="absolute inset-0">
-        {/* عکس روز */}
-        <motion.img
-          key="day"
-          src={bgDay}
-          alt="day background"
-          className="absolute inset-0 w-full h-full object-cover"
-          initial={{ opacity: isNight ? 0 : 1 }}
-          animate={{ opacity: isNight ? 0 : 1 }}
-          transition={{ duration: 1 }}
-        />
-        {/* عکس شب */}
-        <motion.img
-          key="night"
-          src={bgNight}
-          alt="night background"
-          className="absolute inset-0 w-full h-full object-cover"
-          initial={{ opacity: isNight ? 1 : 0 }}
-          animate={{ opacity: isNight ? 1 : 0 }}
-          transition={{ duration: 1 }}
-        />
-        {/* فیلتر برای readability متن */}
-        <div className="absolute inset-0 bg-black/30 md:bg-black/20" />
+        <div className="to-background absolute inset-0 bg-radial from-transparent to-70%" />
+        <DottedMap markers={markers} className="opacity-40 hidden md:block" />
       </div>
 
-      {/* ذرات شناور */}
-      <FloatingParticles isNight={isNight} />
+      {/* محتوای متنی - حالا روی نقشه قرار می‌گیره */}
+      <div className="relative z-10 text-center max-w-xl px-6">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-snug md:leading-tight mb-6 text-gray-700 dark:text-white">
+          کوله‌پشتیتو ببند؛
+          <span className="block mt-2 bg-gradient-to-r from-cyan-400 via-indigo-400 to-violet-400 text-transparent bg-clip-text">
+            همسفرهاشو من پیدا می‌کنم!
+          </span>
+        </h1>
 
-      {/* لایه‌ی محتوا */}
-      <div className="absolute inset-0 flex flex-col justify-between p-6 md:p-12">
-        <BannerHeader
-          isNight={isNight}
-          CurrentIcon={CurrentIcon}
-          muted={muted}
-          toggleMute={toggleMute}
-          time={time}
-        />
-        <BannerCenter {...content} />
-        <BannerFeatures features={content.features} />
+        <p className="text-gray-800 text-sm sm:text-base md:text-lg leading-relaxed mb-8 dark:text-white">
+          از همین‌جا سفر واقعی شروع میشه؛ مسیرتو پیدا کن، همراهاتو بشناس، و
+          تجربه‌های جدید بساز.
+        </p>
+
+        <Button className="transition ease-in">
+          <Link href="/tours">شروع کن</Link>
+        </Button>
       </div>
     </section>
   );
-};
-
-export default React.memo(Banner);
+}

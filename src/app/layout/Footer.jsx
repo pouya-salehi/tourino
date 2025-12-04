@@ -1,4 +1,4 @@
-import { Instagram, Twitter, Mail, Phone, MapPin, Zap } from "lucide-react";
+import { Instagram, TentTree, Mail, Phone, MapPin, Zap } from "lucide-react";
 
 export default function Footer() {
   const socialLinks = [
@@ -18,21 +18,21 @@ export default function Footer() {
   const contactInfo = [{ icon: Mail, text: "cooperstudio2024@gmail.com" }];
 
   return (
-    <footer className="relative overflow-hidden bg-gradient-to-t from-gray-50 to-slate-100 border-t border-gray-200">
+    <footer className="relative overflow-hidden">
       <div className="relative z-10 mx-auto px-6 py-16">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand column */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
-                <Zap className="w-6 h-6 text-white" />
+                <TentTree className="w-6 h-6 text-white" />
               </div>
               <div>
                 <div className="font-black text-2xl text-indigo-600">
-                  Couper
+                  GotoTour
                 </div>
                 <div className="text-xs text-gray-700 font-semibold tracking-widest">
-                  studio
+                  By CouperStudio
                 </div>
               </div>
             </div>

@@ -1,16 +1,16 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import toast, { Toaster } from "react-hot-toast";
-//helper
+import { useSearchParams } from "next/navigation";
+// shadcn components
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+// helpers
 import { normalizePhone } from "@/app/helper/phone";
-//components
-import SignInBtn from "../elements/SingInBtn";
-import OtpInputs from "../modules/auth/OtpInput";
-//icons
-import { Phone } from "lucide-react";
-//ui
-import BorderFrame from "../ui/BorderFrame";
+// toast custom
+import { toast } from "@/components/toast";
 export default function SignInPage() {
   const [phone, setPhone] = useState("");
   const [step, setStep] = useState(1);
@@ -47,76 +47,77 @@ export default function SignInPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: normalizePhone(phone), otp }),
       });
+
       const json = await res.json();
-      if (res.ok) {
-        toast.success("با موفقیت وارد شدید");
-        // 👇 نقش کاربر بر اساس JWT که توی کوکی ذخیره شد
-        if (json.user.role === "ADMIN") {
-          router.push("/dashboard");
-        } else {
-          router.push("/client");
-        }
-      } else {
-        toast.error(json.message || "کد اشتباه است");
+      if (!res.ok) {
+        toast.error(json.message);
+        return;
       }
-    } catch {
-      toast.error("خطا");
+
+      toast.success("ورود موفق");
+      router.push(json.redirect);
+    } catch (err) {
+      toast.error("خطای اتصال");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <BorderFrame>
-        <div className="w-full flex flex-col gap-6 max-w-md p-6 rounded">
+    <div className="w-full flex flex-col justify-center items-center min-h-screen px-4">
+      <Card className="w-full max-w-md border border-gray-200 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-center text-xl font-bold">
+            {step === 1 ? "ورود صاحب تور" : "تایید کد ارسال شده"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           {step === 1 && (
             <>
-              <h3 className="mb-4 font-bold text-center text-lg text-indigo-600">
-                ورود با شماره موبایل
-              </h3>
-              <div className="flex flex-col gap-6 w-full shadow rounded-md p-1">
-                <div className="flex justify-between items-center">
-                  <Phone size={30} />
-                  <div className="w-0.5 h-10 rounded-md bg-gray-100"></div>
-                  <input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="شماره تلفن"
-                    className="w-xs p-2 rounded  text-gray-500 font-bold tracking-[3px]"
-                  />
-                  <span className="font-bold text-gray-500 ml-2">+98</span>
-                </div>
-              </div>
-              <SignInBtn phone={phone} loading={loading} onClick={sendOtp} />
+              <Input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="شماره تلفن"
+                className="w-full"
+              />
+              <Separator />
+
+              <Button onClick={sendOtp} disabled={loading} className="w-full">
+                {loading ? "در حال ارسال..." : "ارسال کد تایید"}
+              </Button>
             </>
           )}
           {step === 2 && (
-            <div className="flex flex-col gap-4">
-              <h3 className="mb-4 font-bold text-lg text-center text-gray-500">
-                کد ۶ رقمی را وارد کنید
-              </h3>
-              <OtpInputs value={otp} onChange={setOtp} />
-              <div className="flex gap-2">
-                <button
-                  onClick={verifyOtp}
-                  disabled={loading || !otp}
-                  className="flex-1 py-2 bg-green-600 font-bold text-white rounded"
-                >
-                  تایید کد
-                </button>
-                <button
-                  onClick={() => setStep(1)}
-                  className="flex-1 py-2 bg-gray-200 font-bold text-gray-500 rounded"
-                >
-                  بازگشت
-                </button>
-              </div>
-            </div>
+            <>
+              <Input
+                placeholder="کد ۶ رقمی"
+                value={otp}
+                maxLength={6}
+                onChange={(e) => setOtp(e.target.value)}
+                className="text-center tracking-[8px] text-xl"
+              />
+
+              <Separator />
+
+              <Button
+                onClick={verifyOtp}
+                disabled={loading}
+                className="w-full py-2"
+              >
+                {loading ? "در حال بررسی..." : "تایید کد"}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => setStep(1)}
+                className="w-full"
+              >
+                بازگشت
+              </Button>
+            </>
           )}
-        </div>
-      </BorderFrame>
-      <Toaster />
+        </CardContent>
+      </Card>
     </div>
   );
 }

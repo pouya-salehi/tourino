@@ -1,8 +1,8 @@
-import Banner from "../modules/homepage/Banner";
+import HeroBanner from "../modules/homepage/Banner";
 function HomePage() {
   return (
     <>
-      <Banner />
+      <HeroBanner />
     </>
   );
 }

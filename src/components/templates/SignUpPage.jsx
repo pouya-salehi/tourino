@@ -1,170 +1,240 @@
 "use client";
-import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import toast from "react-hot-toast";
+
+import { useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
+
+// shadcn
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+
+// toast
+import { toast } from "@/components/toast";
+
+// helper
 import { normalizePhone } from "@/app/helper/phone";
-import OtpInputs from "../modules/auth/OtpInput";
-//icons
-import SignUpBtn from "../elements/SignUpBtn";
-import { User, Phone, Tags } from "lucide-react";
-//ui
-import BorderFrame from "../ui/BorderFrame";
-// کامپوننت اصلی
-function SignUpContent() {
+
+// components
+import SelectRole from "../modules/signup/SelectRole";
+export default function SignUpPage() {
   const [step, setStep] = useState(1);
-  const [phone, setPhone] = useState("");
+
+  const [role, setRole] = useState(""); // NEW
   const [name, setName] = useState("");
   const [title, setTitle] = useState("");
+  const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
+
+  const [slugStatus, setSlugStatus] = useState(null);
+  const [checkingSlug, setCheckingSlug] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const timeoutRef = useRef(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    if (searchParams.get("auth") === "required") {
-      toast.error("برای ادامه باید وارد شوید یا ثبت نام کنید");
+  // ** check slug **
+  const checkSlug = useCallback(async (value) => {
+    if (!value.trim()) {
+      setSlugStatus(null);
+      setCheckingSlug(false);
+      return;
     }
-  }, [searchParams]);
 
-  const sendOtp = async () => {
-    setLoading(true);
+    setCheckingSlug(true);
+    console.log("🔄 Checking slug for:", value);
+
     try {
-      const res = await fetch("/api/auth/send-otp", {
+      const res = await fetch("/api/auth/check-slug", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: normalizePhone(phone), name }),
+        body: JSON.stringify({ title: value }),
       });
-      const json = await res.json();
-      if (res.ok) {
-        toast.success("کد ارسال شد");
-        setStep(2);
-      } else toast.error(json.message);
+
+      console.log("📡 API Response status:", res.status);
+
+      const data = await res.json();
+      console.log("📦 API Response data:", data);
+
+      setSlugStatus(data);
+    } catch (error) {
+      console.log("🚨 Error checking slug:", error);
+      setSlugStatus({ available: false, message: "خطا" });
     } finally {
-      setLoading(false);
+      setCheckingSlug(false);
     }
+  }, []);
+  const handleTitleChange = (e) => {
+    const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+
+    setTitle(value);
+
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    timeoutRef.current = setTimeout(() => {
+      if (value.trim().length > 0) checkSlug(value);
+    }, 600);
   };
 
-  const verifyOtp = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: normalizePhone(phone), otp }),
-      });
-      const json = await res.json();
-      if (res.ok) {
-        toast.success("ثبت‌نام موفق");
-        if (json.role === "ADMIN") {
-          router.push("/dashboard");
-        } else {
-          router.push("/client");
-        }
-      } else toast.error(json.message);
-    } finally {
-      setLoading(false);
+  // ** send OTP **
+  const sendOtp = async () => {
+    if (!role) return toast.error("نوع حساب را مشخص کنید");
+    if (!name) return toast.error("نام و نام خانوادگی را وارد کنید");
+    if (!phone) return toast.error("شماره موبایل را وارد کنید");
+
+    // اگر صاحب تور است → title باید باشد
+    if (role === "OWNER") {
+      if (!title) return toast.error("عنوان تور لازم است");
+      if (slugStatus && !slugStatus.available)
+        return toast.error("عنوان تور قبلاً انتخاب شده");
     }
+
+    setLoading(true);
+
+    const res = await fetch("/api/auth/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        role,
+        phone: normalizePhone(phone),
+        name,
+        title: role === "OWNER" ? title : null,
+      }),
+    });
+
+    const data = await res.json();
+    setLoading(false);
+
+    if (!res.ok) return toast.error(data.message);
+
+    toast.success("کد ارسال شد");
+    setStep(2);
+  };
+
+  // ** verify OTP **
+  const verifyOtp = async () => {
+    if (otp.length !== 6) return toast.error("کد ۶ رقمی را وارد کنید");
+
+    setLoading(true);
+
+    const res = await fetch("/api/auth/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phone: normalizePhone(phone),
+        otp,
+      }),
+    });
+
+    const data = await res.json();
+    setLoading(false);
+
+    if (!res.ok) return toast.error(data.message);
+
+    toast.success("ثبت‌نام انجام شد ✔");
+    router.push(data.redirect);
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[70vh]">
-      <BorderFrame>
-        <div className="w-full flex flex-col gap-6 max-w-md p-6 rounded">
+    <div className="w-full flex justify-center items-center min-h-screen px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center text-xl font-bold">
+            {step === 1 ? "ثبت‌نام" : "تایید کد"}
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
           {step === 1 && (
             <>
-              <h3 className="mb-4 font-bold text-2xl text-center text-indigo-600">
-                فرم ثبت‌نام صاحبان کسب و کار
-              </h3>
+              {/* انتخاب نقش */}
+              <SelectRole value={role} onChange={setRole} />
 
-              <div className="flex flex-col gap-1 w-full shadow rounded-md p-1">
-                <div className="flex justify-between items-center">
-                  <User size={30} />
-                  <div className="w-0.5 h-10 rounded-md bg-gray-100"></div>
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="نام و نام خانوادگی"
-                    className="w-xs p-2 rounded  text-gray-400 font-bold "
-                  />
-                  <span className="font-bold text-gray-500 ml-2 opacity-0">
-                    +98
-                  </span>
-                </div>
-              </div>
-              <div className="flex flex-col gap-1 w-full shadow rounded-md p-1">
-                <div className="flex justify-between items-center">
-                  <Tags size={30} />
-                  <div className="w-0.5 h-10 rounded-md bg-gray-100"></div>
-                  <input
+              <Input
+                placeholder="نام و نام خانوادگی"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+
+              {/* فقط اگر owner بود */}
+              {role === "OWNER" && (
+                <div className="relative flex items-center">
+                  <Input
+                    placeholder="عنوان تور (لاتین)"
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="عنوان توور"
-                    className="w-xs p-2 rounded  text-gray-400 font-bold "
+                    onChange={handleTitleChange}
+                    className={` ${
+                      slugStatus?.available
+                        ? "border-green-500"
+                        : slugStatus && !slugStatus.available
+                        ? "border-red-500"
+                        : ""
+                    }`}
                   />
-                  <span className="font-bold text-gray-500 ml-2 opacity-0">
-                    +98
-                  </span>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                    {checkingSlug && (
+                      <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                    )}
+                    {slugStatus?.available && (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    )}
+                    {slugStatus && !slugStatus.available && (
+                      <XCircle className="h-4 w-4 text-red-500" />
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col gap-1 w-full shadow rounded-md p-1">
-                <div className="flex justify-between items-center">
-                  <Phone size={30} />
-                  <div className="w-0.5 h-10 rounded-md bg-gray-100"></div>
-                  <input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="شماره تلفن"
-                    className="w-xs p-2 rounded  text-gray-500 font-bold tracking-[3px]"
-                  />
-                  <span className="font-bold text-withe ml-2">+98</span>
-                </div>
-              </div>
-              <SignUpBtn onClick={sendOtp} loading={loading} />
+              )}
+
+              <Input
+                placeholder="شماره موبایل"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+
+              <Separator />
+
+              <Button
+                className="w-full"
+                disabled={loading || checkingSlug}
+                onClick={sendOtp}
+              >
+                {loading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  "ارسال کد تایید"
+                )}
+              </Button>
             </>
           )}
-          {step === 2 && (
-            <div className="flex flex-col gap-4">
-              <h3 className="mb-4 font-bold text-2xl text-gray-500 text-center">
-                کد تایید
-              </h3>
-              <OtpInputs value={otp} onChange={setOtp} />
-              <div className="flex items-center gap-2 w-full">
-                <button
-                  onClick={verifyOtp}
-                  disabled={loading}
-                  className="py-2 bg-green-600 text-white w-full rounded"
-                >
-                  تایید
-                </button>
-                <button
-                  onClick={() => setStep(1)}
-                  className="py-2 bg-gray-200 font-bold text-gray-500 rounded w-full"
-                >
-                  بازگشت
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </BorderFrame>
-    </div>
-  );
-}
 
-// کامپوننت اصلی با Suspense
-export default function SignUpPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex justify-center items-center min-h-[70vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
-            <p className="mt-4 text-gray-500">در حال بارگذاری...</p>
-          </div>
-        </div>
-      }
-    >
-      <SignUpContent />
-    </Suspense>
+          {step === 2 && (
+            <>
+              <Input
+                value={otp}
+                maxLength={6}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="کد ۶ رقمی"
+                className="text-center tracking-[8px] text-xl"
+              />
+
+              <Separator />
+
+              <Button className="w-full" onClick={verifyOtp} disabled={loading}>
+                {loading ? <Loader2 className="animate-spin" /> : "تایید کد"}
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setStep(1)}
+              >
+                بازگشت
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
