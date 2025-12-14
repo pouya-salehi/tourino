@@ -11,7 +11,7 @@ export default function PanelLayout({ children }) {
     {
       title: "اعمال آگهی",
       icon: <Megaphone />,
-      href: "/owner/adv",
+      href: "/owner/add-modal",
     },
   ];
 

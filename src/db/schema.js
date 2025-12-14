@@ -16,7 +16,39 @@ export const verifyEnum = pgEnum("verify_status", [
   "APPROVED",
   "REJECTED",
 ]);
+//For Modal announcement modal
+export const modalBackgroundEnum = pgEnum("modal_background", [
+  "solid",
+  "gradient",
+  "image",
+]);
 
+export const modalAnimationEnum = pgEnum("modal_animation", [
+  "fade",
+  "slide-up",
+  "slide-down",
+  "zoom-in",
+]);
+// -------------------- MODALS --------------------
+export const modals = pgTable("modals", {
+  id: serial("id").primaryKey(),
+
+  title: text("title").notNull(),
+  couponPercentage: integer("coupon_percentage").default(0),
+
+  expiresAt: timestamp("expires_at").notNull(),
+
+  backgroundType: modalBackgroundEnum("background_type").default("solid"),
+  backgroundValue: text("background_value").notNull(),
+
+  animation: modalAnimationEnum("animation").default("fade"),
+
+  ownerId: integer("owner_id")
+    .references(() => users.id)
+    .notNull(),
+
+  createdAt: timestamp("created_at").defaultNow(),
+});
 // -------------------- USERS --------------------
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),

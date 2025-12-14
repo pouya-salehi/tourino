@@ -8,8 +8,9 @@ import {
   PanelsTopLeft,
   MonitorCog,
   CircleAlert,
+  Image,
 } from "lucide-react";
-
+import { motion } from "framer-motion";
 export default function PanelLayout({ children }) {
   const { slug } = useParams();
 
@@ -39,27 +40,43 @@ export default function PanelLayout({ children }) {
       icon: <Settings />,
       href: `/${slug}/panel/setting`,
     },
+    {
+      title: "ویرایش عکس",
+      icon: <Image />,
+      href: `/${slug}/panel/edit-image`,
+    },
   ];
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex py-14">
       <aside className="w-fit rounded-md p-2">
         <ul className="flex flex-col gap-2 bg-gradient-to-b rounded-md from-indigo-500 to-purple-500 text-white">
           {routes.map((route) => (
-            <li
+            <motion.li
               key={route.title}
-              className="flex flex-col items-center  gap-1 rounded-md p-2 cursor-pointer transition h-18"
+              whileHover={{ y: -4 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="relative flex flex-col items-center gap-1 rounded-md p-2 cursor-pointer h-18"
             >
               <Link
-                className="flex flex-col items-center w-full h-full justify-center"
                 href={route.href}
+                className="flex flex-col items-center w-full h-full justify-center"
               >
-                {route.icon}
-                <span className=" dark:text-white text-xs mt-1 w-full text-center">
+                {/* آیکن */}
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  {route.icon}
+                </motion.div>
+
+                {/* عنوان */}
+                <span className="text-xs mt-1 w-full text-center dark:text-white">
                   {route.title}
                 </span>
               </Link>
-            </li>
+            </motion.li>
           ))}
         </ul>
       </aside>

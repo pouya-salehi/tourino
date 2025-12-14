@@ -90,12 +90,10 @@ export async function middleware(req) {
       return NextResponse.next(); // صاحب تور معتبر
     }
 
-    // اگر OWNER با اسلاگ اشتباه وارد شود
     if (role === "OWNER" && userSlug !== slug) {
       return NextResponse.redirect(new URL(`/${userSlug}/panel`, req.url));
     }
 
-    // اگر Client باشد
     if (role === "USER") {
       return NextResponse.redirect(new URL("/client", req.url));
     }
@@ -103,10 +101,6 @@ export async function middleware(req) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // -------------------------------
-  // 🔒 بخش Client
-  // فقط USER اجازه دارد
-  // -------------------------------
   if (pathname.startsWith("/client")) {
     if (role !== "USER") {
       if (role === "OWNER") {
@@ -120,9 +114,6 @@ export async function middleware(req) {
     return NextResponse.next();
   }
 
-  // -------------------------------
-  // 🔒 API محافظت‌شده
-  // -------------------------------
   if (pathname.startsWith("/api/") && !pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
@@ -131,10 +122,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: [
-    "/owner/:path*",
-    "/client/:path*",
-    "/:slug/panel/:path*",
-    "/api/:path*",
-  ],
+  matcher: ["/owner/:path*", "/client/:path*", "/:slug/panel/:path*"],
 };

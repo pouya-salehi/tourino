@@ -1,6 +1,7 @@
 "use client";
 import NavLinks from "./NavLinks";
 import UserMenu from "./NavAuth";
+import GoToTour from "./GoToTour";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "../ui/button";
 import { useTheme } from "@/context/ThemeContext";
@@ -10,7 +11,7 @@ function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <nav className="flex justify-between items-center p-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between w-full bg-white/90 p-4 transition-all duration-500">
       <div>
         <NavLinks />
       </div>
@@ -35,15 +36,18 @@ function Navbar() {
               className="flex items-center justify-center"
             >
               {theme === "light" ? (
-                <Sun size={22} className="text-amber-500" />
+                <Sun size={26} className="text-amber-500" />
               ) : (
-                <Moon size={22} className="text-indigo-300" />
+                <Moon size={26} className="text-indigo-50" />
               )}
             </motion.div>
           </AnimatePresence>
         </button>
 
-        <UserMenu />
+        <div className="flex items-center">
+          <GoToTour />
+          <UserMenu />
+        </div>
       </div>
     </nav>
   );

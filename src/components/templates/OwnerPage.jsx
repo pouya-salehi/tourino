@@ -1,402 +1,258 @@
 "use client";
-import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+//modules
+import Pagination from "../modules/owner/ownerpage/Pagination";
+import ClientModal from "../modules/owner/ownerpage/ClientModal";
+import ClientCard from "../modules/owner/ownerpage/ClinetCard";
+import SidebarFilters from "../modules/owner/ownerpage/SidebarFilters";
+import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Search,
-  Filter,
+  RefreshCcw,
   Users,
-  DollarSign,
   CheckCircle,
   XCircle,
-  RefreshCcw,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+
 import {
   Select,
-  SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
 
-export default function OwnerPage() {
-  const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState({
-    tourId: "all",
-    status: "all",
-  });
-  const [stats, setStats] = useState({
-    totalClients: 0,
-    pending: 0,
-    confirmed: 0,
-    totalRevenue: 0,
-  });
-  const [tours, setTours] = useState([]);
+/* ---------------------------
+  Constants
+--------------------------- */
+const DEFAULT_LIMIT = 20;
 
+/* ---------------------------
+  Helper: debounce hook
+--------------------------- */
+function useDebounce(value, delay = 400) {
+  const [deb, setDeb] = useState(value);
   useEffect(() => {
-    fetchClients();
-    fetchStats();
-  }, [search, filters]);
+    const t = setTimeout(() => setDeb(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return deb;
+}
 
-  async function fetchClients() {
-    setLoading(true);
-    try {
-      let url = `/api/owner/clients?search=${encodeURIComponent(search)}`;
-      if (filters.tourId !== "all") url += `&tourId=${filters.tourId}`;
-      if (filters.status !== "all") url += `&status=${filters.status}`;
+/* ---------------------------
+  Main OwnerPage
+--------------------------- */
+export default function OwnerPage() {
+  // state
+  const [clients, setClients] = useState([]);
+  const [tours, setTours] = useState([]);
+  const [stats, setStats] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [selectedClientDocs, setSelectedClientDocs] = useState(null); // 👈 اینو اضافه کن
 
-      const res = await fetch(url, {
-        cache: "no-store",
-        credentials: "include",
-      });
-      const data = await res.json();
+  const [search, setSearch] = useState("");
+  const debSearch = useDebounce(search, 450);
 
-      if (data.success) {
-        setClients(data.clients || []);
-        setTours(data.filters?.tours || []);
-      } else {
-        console.error("Error fetching clients:", data.message);
+  const [filters, setFilters] = useState({ tourId: "all", status: "all" });
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(DEFAULT_LIMIT);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // fetch function (memoized)
+  const fetchClients = useCallback(
+    async (opts = {}) => {
+      setLoading(true);
+      try {
+        const q = new URLSearchParams();
+        if (debSearch) q.append("search", debSearch);
+        if (filters.tourId && filters.tourId !== "all")
+          q.append("tourId", filters.tourId);
+        if (filters.status && filters.status !== "all")
+          q.append("status", filters.status);
+        q.append("page", opts.page ?? page);
+        q.append("limit", limit);
+
+        const url = `/api/owner/clients?${q.toString()}`;
+
+        const res = await fetch(url, {
+          cache: "no-store",
+          credentials: "include",
+        });
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          throw new Error(json.message || "خطا در دریافت داده‌ها");
+        }
+
+        setClients(json.clients || []);
+        setTours(json.filters?.tours || []);
+        setStats(json.stats || {});
+        setTotalPages(json.pagination?.totalPages || 1);
+      } catch (err) {
+        console.error("fetchClients error:", err);
+        toast.error(err.message || "خطا در دریافت مشتری‌ها");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Fetch error:", err);
-    }
-    setLoading(false);
-  }
-
-  async function fetchStats() {
-    try {
-      const res = await fetch("/api/owner/clients?limit=1", {
-        cache: "no-store",
-        credentials: "include",
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        setStats(data.stats || {});
-      }
-    } catch (err) {
-      console.error("Error fetching stats:", err);
-    }
-  }
-
-  // فیلتر مشتری‌ها بر اساس جستجو
-  const filteredClients = clients.filter((c) =>
-    `${c.fullName} ${c.phone}`.toLowerCase().includes(search.toLowerCase())
+    },
+    [debSearch, filters, page, limit]
   );
 
-  // تابع برای نمایش وضعیت
-  const getStatusBadge = (status) => {
-    const config = {
-      PENDING: {
-        color: "bg-yellow-100 text-yellow-800",
-        icon: "⏳",
-        label: "در انتظار",
-      },
-      CONFIRMED: {
-        color: "bg-green-100 text-green-800",
-        icon: "✅",
-        label: "تایید شده",
-      },
-      CANCELLED: {
-        color: "bg-red-100 text-red-800",
-        icon: "❌",
-        label: "لغو شده",
-      },
-      COMPLETED: {
-        color: "bg-blue-100 text-blue-800",
-        icon: "🏁",
-        label: "تکمیل شده",
-      },
-    };
+  // initial + deps
+  useEffect(() => {
+    // whenever search/filters/page change -> fetch
+    setPage(1); // reset page on new filter/search
+  }, [debSearch, filters]);
 
-    const cfg = config[status] || {
-      color: "bg-gray-100 text-gray-800",
-      icon: "❓",
-      label: status,
-    };
+  useEffect(() => {
+    fetchClients({ page });
+  }, [fetchClients, page]);
 
-    return (
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${cfg.color}`}
-      >
-        {cfg.icon} {cfg.label}
-      </span>
-    );
+  // actions
+  const openClient = (client) => {
+    setSelectedClient(client);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedClient(null);
+    setModalOpen(false);
+  };
+
+  const confirmBooking = async (client) => {
+    // optimistic UI example: call API to confirm booking
+    try {
+      const res = await fetch("/api/owner/bookings/confirm", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: client.id }),
+      });
+      const j = await res.json();
+      if (!res.ok || !j.success) throw new Error(j.message || "خطا");
+
+      toast.success("رزرو تایید شد");
+      // refresh small: update local item
+      setClients((prev) =>
+        prev.map((c) =>
+          c.id === client.id ? { ...c, status: "CONFIRMED" } : c
+        )
+      );
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "خطا در تایید رزرو");
+    }
+  };
+
+  const cancelBooking = async (client) => {
+    try {
+      const res = await fetch("/api/owner/bookings/cancel", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: client.id }),
+      });
+      const j = await res.json();
+      if (!res.ok || !j.success) throw new Error(j.message || "خطا");
+
+      toast.success("رزرو لغو شد");
+      setClients((prev) =>
+        prev.map((c) =>
+          c.id === client.id ? { ...c, status: "CANCELLED" } : c
+        )
+      );
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "خطا در لغو رزرو");
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchClients({ page: 1 });
   };
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="w-72 p-5 flex flex-col gap-4">
-        <h2 className="text-xl font-bold text-gray-800">فیلتر مشتری‌ها</h2>
+    <div className="min-h-screen shadow-none">
+      <div className="mx-auto grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
+        <SidebarFilters
+          search={search}
+          setSearch={setSearch}
+          tours={tours}
+          filters={filters}
+          setFilters={setFilters}
+          stats={stats}
+          onRefresh={handleRefresh}
+        />
 
-        {/* جستجو */}
-        <div className="flex items-center gap-2 border rounded-lg px-3 py-2">
-          <Search className="w-4 h-4 text-gray-500" />
-          <Input
-            placeholder="جستجو با نام یا شماره تماس..."
-            className="border-none bg-transparent focus-visible:ring-0"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
-        {/* فیلتر تور */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
-            فیلتر بر اساس تور
-          </label>
-          <Select
-            value={filters.tourId}
-            onValueChange={(value) => setFilters({ ...filters, tourId: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="همه تورها" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">همه تورها</SelectItem>
-              {tours.map((tour) => (
-                <SelectItem key={tour.id} value={tour.id.toString()}>
-                  {tour.title} ({tour.price?.toLocaleString()} ریال)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* فیلتر وضعیت */}
-        <div className="space-y-2 w-full">
-          <label className="text-sm font-medium text-gray-700">
-            فیلتر بر اساس وضعیت
-          </label>
-          <Select
-            value={filters.status}
-            onValueChange={(value) => setFilters({ ...filters, status: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="همه وضعیت‌ها" />
-            </SelectTrigger>
-            <SelectContent className="w-full">
-              <SelectItem value="all">همه وضعیت‌ها</SelectItem>
-              <SelectItem value="PENDING">در انتظار تایید</SelectItem>
-              <SelectItem value="CONFIRMED">تایید شده</SelectItem>
-              <SelectItem value="CANCELLED">لغو شده</SelectItem>
-              <SelectItem value="COMPLETED">تکمیل شده</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* آمار */}
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-          <h3 className="font-bold text-blue-800 mb-2">آمار کلی</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">کل مشتریان:</span>
-              <span className="font-bold">{stats.totalClients}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">در انتظار:</span>
-              <span className="font-bold text-yellow-600">{stats.pending}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">تایید شده:</span>
-              <span className="font-bold text-green-600">
-                {stats.confirmed}
+        <main className="rounded-lg p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-gray-500">
+                لیست مشتری‌ها
+              </h1>
+              <span className="text-sm text-gray-500">
+                ({stats.totalClients ?? 0})
               </span>
             </div>
-          </div>
-        </div>
-      </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">لیست مشتری‌ها</h1>
-          <Button
-            onClick={fetchClients}
-            variant="outline"
-            size="sm"
-            className="border-0 rounded-md"
-          >
-            <RefreshCcw />
-            بروزرسانی
-          </Button>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 w-full rounded-xl" />
-            ))}
-          </div>
-        ) : filteredClients.length === 0 ? (
-          <div className="text-center py-12">
-            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">هنوز مشتری‌ای ثبت‌نام نکرده است.</p>
-            <p className="text-sm text-gray-400 mt-2">
-              بعد از ثبت‌نام کاربران در تورهای شما، اینجا نمایش داده می‌شوند.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredClients.map((client) => (
-              <div
-                key={client.id}
-                onClick={() => setSelectedClient(client)}
-                className="bg-white shadow-sm rounded-xl p-4 border cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-blue-300"
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="border-2 rounded-md"
+                onClick={() => fetchClients({ page: 1 })}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="font-semibold text-lg text-gray-800">
-                      {client.fullName}
-                    </p>
-                    <p className="text-gray-500 text-sm mt-1">{client.phone}</p>
-                  </div>
-                  {getStatusBadge(client.status)}
-                </div>
-
-                <div className="mt-3 space-y-1">
-                  <p className="text-sm">
-                    <span className="text-gray-600">تور:</span>{" "}
-                    <span className="font-medium">{client.tourTitle}</span>
-                  </p>
-                  <p className="text-sm">
-                    <span className="text-gray-600">تعداد نفرات:</span>{" "}
-                    <span className="font-medium">{client.people} نفر</span>
-                  </p>
-                  <p className="text-sm">
-                    <span className="text-gray-600">مبلغ:</span>{" "}
-                    <span className="font-medium text-green-600">
-                      {client.price?.toLocaleString()} ریال
-                    </span>
-                  </p>
-                  <p className="text-xs text-gray-400 mt-2">
-                    📅 {client.createdAt}
-                  </p>
-                </div>
-              </div>
-            ))}
+                <RefreshCcw className="w-4 h-4" />
+                بروزرسانی
+              </Button>
+            </div>
           </div>
-        )}
-      </main>
 
-      {/* Modal نمایش جزئیات */}
-      <Dialog
-        open={!!selectedClient}
-        onOpenChange={() => setSelectedClient(null)}
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>جزئیات رزرو مشتری</DialogTitle>
-          </DialogHeader>
-
-          {selectedClient && (
-            <div className="space-y-4 mt-2">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p>
-                    <strong className="text-gray-700">نام کامل:</strong>
-                  </p>
-                  <p className="bg-gray-50 p-2 rounded">
-                    {selectedClient.fullName}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <p>
-                    <strong className="text-gray-700">شماره تماس:</strong>
-                  </p>
-                  <p className="bg-gray-50 p-2 rounded">
-                    {selectedClient.phone}
-                  </p>
-                </div>
+          {loading ? (
+            <div className="flex flex-col gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-36 rounded-lg" />
+              ))}
+            </div>
+          ) : clients.length === 0 ? (
+            <div className="text-center py-20 text-gray-500">
+              <Users className="mx-auto w-16 h-16 mb-4" />
+              <div className="text-lg">مشتری‌ای یافت نشد</div>
+              <div className="text-sm mt-2">
+                با تغییر فیلترها دوباره امتحان کنید
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p>
-                    <strong className="text-gray-700">کد ملی:</strong>
-                  </p>
-                  <p className="bg-gray-50 p-2 rounded">
-                    {selectedClient.nationalCode || "ثبت نشده"}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <p>
-                    <strong className="text-gray-700">وضعیت رزرو:</strong>
-                  </p>
-                  <div className="p-2">
-                    {getStatusBadge(selectedClient.status)}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <p>
-                  <strong className="text-gray-700">تور:</strong>
-                </p>
-                <p className="bg-gray-50 p-2 rounded">
-                  {selectedClient.tourTitle}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p>
-                    <strong className="text-gray-700">تعداد نفرات:</strong>
-                  </p>
-                  <p className="bg-gray-50 p-2 rounded">
-                    {selectedClient.people} نفر
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <p>
-                    <strong className="text-gray-700">مبلغ کل:</strong>
-                  </p>
-                  <p className="bg-gray-50 p-2 rounded font-bold text-green-600">
-                    {selectedClient.price?.toLocaleString()} ریال
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <p>
-                  <strong className="text-gray-700">تاریخ رزرو:</strong>
-                </p>
-                <p className="bg-gray-50 p-2 rounded">
-                  {selectedClient.createdAt}
-                </p>
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t">
-                <Button
-                  variant="default"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                >
-                  <CheckCircle className="w-4 h-4 ml-2" />
-                  تایید رزرو
-                </Button>
-                <Button variant="destructive" className="flex-1">
-                  <XCircle className="w-4 h-4 ml-2" />
-                  لغو رزرو
-                </Button>
-                <Button variant="outline" className="flex-1">
-                  ویرایش
-                </Button>
+            </div>
+          ) : (
+            <div className="">
+              <div className="flex flex-col gap-4">
+                {clients.map((c) => (
+                  <ClientCard key={c.id} client={c} onOpen={openClient} />
+                ))}
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </main>
+      </div>
+      <ClientModal
+        open={modalOpen}
+        onClose={closeModal}
+        user={selectedClient} // اطلاعات کاربر
+        documents={selectedClientDocs} // مدارک احراز
+      />
     </div>
   );
 }
