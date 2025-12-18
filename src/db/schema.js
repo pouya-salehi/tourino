@@ -87,17 +87,39 @@ export const users = pgTable("users", {
 // -------------------- TOURS --------------------
 export const tours = pgTable("tours", {
   id: serial("id").primaryKey(),
+
+  // 🔗 ارتباط با صاحب تور
   ownerId: integer("owner_id")
     .references(() => users.id)
     .notNull(),
+
+  // 📝 اطلاعات اصلی
   title: text("title").notNull(),
   slug: text("slug").notNull().unique(),
   description: text("description").notNull(),
+
+  // 💰 قیمت و ظرفیت
   price: integer("price").notNull(),
+  maxPeople: integer("max_people"),
+
+  // 🖼️ تصاویر (URL های نهایی)
   images: text("images").array(),
+
+  // 📍 لوکیشن و زمان
+  location: text("location"),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
-  maxPeople: integer("max_people"),
+  features: text("features").array().default([]),
+  includes: text("includes").array().default([]),
+  excludes: text("excludes").array().default([]),
+  schedule: text("schedule").array().default([]),
+  faqs: text("faqs").array().default([]),
+  enableComments: boolean("enable_comments").default(true),
+  showLikes: boolean("show_likes").default(true),
+  showRating: boolean("show_rating").default(true),
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  metaKeywords: text("meta_keywords").array().default([]),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

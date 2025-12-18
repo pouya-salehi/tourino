@@ -11,7 +11,7 @@ function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between w-full bg-white/90 p-4 transition-all duration-500">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between w-full bg-white/90 dark:bg-black/80 p-4 transition-all duration-500">
       <div>
         <NavLinks />
       </div>

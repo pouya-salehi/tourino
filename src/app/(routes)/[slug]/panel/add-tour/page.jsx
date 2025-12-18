@@ -1,4 +1,4 @@
-import AddTourPage from "@/components/templates/panel/AddTourPage";
+import AddTourPage from "@/components/templates/panel/create-tour-form/AddTourPage";
 function page() {
   return <AddTourPage />;
 }

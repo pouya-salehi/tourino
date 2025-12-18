@@ -1,7 +1,7 @@
 "use client";
-
+import { useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { User, LogOut, Settings, LogIn, FileInput } from "lucide-react";
+import { User, LogOut, Settings, LogIn, FileInput, House } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "../ui/button";
@@ -19,7 +19,7 @@ import {
 export default function UserMenu() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-
+  const slug = useParams();
   const menuRef = useRef();
 
   const handleLogout = async () => {
@@ -66,7 +66,7 @@ export default function UserMenu() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                className="rounded-full p-4"
+                className="rounded-full p-4 cursor-pointer"
                 onClick={() => setOpen((v) => !v)}
               >
                 <User size={22} />
@@ -74,10 +74,10 @@ export default function UserMenu() {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent open={open} align="end" className="w-64">
-              <div className="flex justify-between items-center px-2">
+              <div className="flex justify-between items-center px-2 text-gray-500 text-xs">
                 <DropdownMenuLabel>{user.phone}</DropdownMenuLabel>
                 <DropdownMenuLabel className="opacity-70">
-                  {user.role}
+                  <em>{user.role}</em>
                 </DropdownMenuLabel>
               </div>
 
@@ -85,18 +85,24 @@ export default function UserMenu() {
 
               <DropdownMenuGroup>
                 <DropdownMenuItem>
-                  <Link href={getPanel()} className="flex items-center gap-2">
+                  <Link href={getPanel()} className="flex items-center py-2 gap-2">
                     <Settings size={18} />
                     حساب کاربری
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
-
-              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>
+                  <Link href="/" className="flex items-center py-2 gap-2">
+                    <House size={18} />
+                    صفحه اصلی
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
 
               <DropdownMenuItem onClick={handleLogout}>
-                <span className="flex gap-2 items-center text-red-600">
-                  <LogOut size={18} />
+                <span className="flex py-2 gap-2 items-center text-red-600 cursor-pointer">
+                  <LogOut size={18} color="#EE4B2B"/>
                   خروج
                 </span>
               </DropdownMenuItem>

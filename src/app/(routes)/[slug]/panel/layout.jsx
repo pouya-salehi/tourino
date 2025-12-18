@@ -9,6 +9,7 @@ import {
   MonitorCog,
   CircleAlert,
   Image,
+  Tent
 } from "lucide-react";
 import { motion } from "framer-motion";
 export default function PanelLayout({ children }) {
@@ -21,9 +22,14 @@ export default function PanelLayout({ children }) {
       href: `/${slug}/panel`,
     },
     {
-      title: "افزودن توور",
+      title: "افزودن تور",
       icon: <PanelsTopLeft />,
       href: `/${slug}/panel/add-tour`,
+    },
+    {
+      title: "لیست تورها",
+      icon: <Tent />,
+      href: `/${slug}/panel/tours`,
     },
     {
       title: "مشاهده حساب",

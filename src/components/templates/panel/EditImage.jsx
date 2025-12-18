@@ -330,7 +330,7 @@ export default function ImageEditor() {
                   <Label>آپلود عکس</Label>
                   <Button
                     onClick={() => fileInputRef.current.click()}
-                    className="w-full"
+                    className="w-full dark:text-white"
                     variant="outline"
                   >
                     <Upload className="ml-2 h-4 w-4" />
@@ -660,7 +660,7 @@ export default function ImageEditor() {
               <CardContent>
                 <div
                   ref={previewRef}
-                  className="relative bg-gray-100 rounded-lg p-4 min-h-[500px] flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300"
+                  className="relative bg-gray-100 dark:bg-transparent dark:border-gray-600 rounded-lg p-4 min-h-[500px] flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300"
                   onMouseLeave={endDrag}
                 >
                   {image ? (
@@ -691,7 +691,7 @@ export default function ImageEditor() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 flex items-center justify-center">
+                      <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-100 to-purple-100  flex items-center justify-center">
                         <Upload className="h-12 w-12 text-blue-400" />
                       </div>
                       <h3 className="text-xl font-semibold text-gray-700 mb-2">

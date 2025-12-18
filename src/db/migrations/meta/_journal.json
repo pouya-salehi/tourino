@@ -36,6 +36,20 @@
       "when": 1764936169150,
       "tag": "0004_greedy_ted_forrester",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1765705527490,
+      "tag": "0005_breezy_falcon",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1765705747182,
+      "tag": "0006_left_hiroim",
+      "breakpoints": true
     }
   ]
 }
