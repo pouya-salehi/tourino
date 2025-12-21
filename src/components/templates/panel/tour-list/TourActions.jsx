@@ -38,27 +38,28 @@ export default function TourActions({ tour, onViewDetails, onRefresh }) {
   };
 
   const handleEdit = (id) => {
-    router.push(`/admin/tours/edit/${id}`);
+    // اصلاح این خط: از tour.id استفاده کن نه tourId
+    router.push(`/admin/tours/edit/${tour.id}`);
   };
 
   const handleDelete = async () => {
     setDeleting(true);
+
     try {
-      const res = await fetch(`/api/tours/${tour.id}`, {
+      const res = await fetch(`/api/tours/create/${tour.id}`, {
         method: "DELETE",
       });
 
-      const result = await res.json();
+      const data = await res.json();
 
-      if (result.success) {
-        toast.success("تور با موفقیت حذف شد");
-        onRefresh();
-      } else {
-        toast.error(result.message);
+      if (!res.ok) {
+        throw new Error(data.message);
       }
+
+      toast.success("تور با موفقیت حذف شد");
+      onRefresh();
     } catch (error) {
-      console.error("❌ Delete error:", error);
-      toast.error("خطا در حذف تور");
+      toast.error(error.message || "خطا در حذف تور");
     } finally {
       setDeleting(false);
       setDeleteDialogOpen(false);
@@ -107,15 +108,11 @@ export default function TourActions({ tour, onViewDetails, onRefresh }) {
 
       {/* Dialog حذف */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
+        <AlertDialogContent className="border-0 flex flex-col justify-center text-center items-center">
+          <AlertDialogHeader className="flex flex-col text-center items-center justify-center">
             <AlertDialogTitle>حذف تور</AlertDialogTitle>
             <AlertDialogDescription>
               آیا از حذف تور "{tour.title}" مطمئن هستید؟
-              <br />
-              <span className="text-amber-600 font-medium">
-                این عمل غیرقابل بازگشت است!
-              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -123,7 +120,7 @@ export default function TourActions({ tour, onViewDetails, onRefresh }) {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 cursor-pointer"
             >
               {deleting ? (
                 <>

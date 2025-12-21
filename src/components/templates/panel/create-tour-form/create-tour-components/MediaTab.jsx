@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { toast } from "@/components/toast";
 
 import MediaUploader from "./MediaUploader";
 import MediaGallery from "./MediaGallery";
@@ -17,25 +18,76 @@ import MediaGallerySkeleton from "@/components/skeletons/MediaGallerySkeleton";
 export default function MediaTab({ selectedImages = [], setSelectedImages }) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFilesUpload = (files) => {
+  // تابع برای آپلود فایل به سرور
+  const uploadFileToServer = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/tours/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        // تغییر این خط: بررسی وجود message در result
+        throw new Error(result.message || result.error || "خطا در آپلود عکس");
+      }
+
+      return {
+        success: true,
+        url: result.url,
+        filename: result.filename,
+      };
+    } catch (error) {
+      console.error("❌ Upload error:", error);
+      throw error;
+    }
+  };
+
+  const handleFilesUpload = async (files) => {
     if (!files || files.length === 0) return;
 
     setIsLoading(true);
+    const uploadedImages = [];
 
-    // شبیه‌سازی لود (برای UX بهتر)
-    setTimeout(() => {
-      const newImages = files.map((file) => ({
-        id: crypto.randomUUID(),
-        file,
-        name: file.name,
-        size: file.size,
-        preview: URL.createObjectURL(file),
-        status: "uploaded",
-      }));
+    try {
+      // آپلود هر فایل به سرور
+      for (const file of files) {
+        try {
+          const uploadResult = await uploadFileToServer(file);
 
-      setSelectedImages((prev) => [...prev, ...newImages]);
+          if (uploadResult.success) {
+            uploadedImages.push({
+              id: crypto.randomUUID(),
+              file,
+              name: file.name,
+              size: file.size,
+              preview: uploadResult.url, // ✅ URL واقعی از سرور
+              url: uploadResult.url, // ✅ URL واقعی از سرور
+              status: "uploaded",
+              serverFilename: uploadResult.filename,
+            });
+          }
+        } catch (error) {
+          console.error(`❌ Error uploading ${file.name}:`, error);
+          toast.error(`خطا در آپلود "${file.name}": ${error.message}`);
+        }
+      }
+
+      // اضافه کردن عکس‌های آپلود شده
+      if (uploadedImages.length > 0) {
+        setSelectedImages((prev) => [...prev, ...uploadedImages]);
+        toast.success(`${uploadedImages.length} عکس با موفقیت آپلود شد`);
+      }
+    } catch (error) {
+      console.error("❌ Upload process error:", error);
+      toast.error("خطا در آپلود عکس‌ها");
+    } finally {
       setIsLoading(false);
-    }, 800); // ⏱️ می‌تونی کم یا زیادش کنی
+    }
   };
 
   const handleRemoveImage = (index) => {
@@ -69,7 +121,7 @@ export default function MediaTab({ selectedImages = [], setSelectedImages }) {
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             آپلود عکس‌های جدید
           </h3>
-          <MediaUploader onUpload={handleFilesUpload} />
+          <MediaUploader onUpload={handleFilesUpload} disabled={isLoading} />
         </div>
 
         {/* gallery / skeleton */}

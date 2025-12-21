@@ -153,7 +153,7 @@ export default function TourManagementPage() {
 
       {/* تب‌های مختلف */}
       <Tabs value={activeTab} onValueChange={handleStatusChange}>
-        <TabsList className="grid w-full md:w-auto grid-cols-3">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="all">همه تورها</TabsTrigger>
           <TabsTrigger value="active">فعال</TabsTrigger>
           <TabsTrigger value="expired">منقضی شده</TabsTrigger>

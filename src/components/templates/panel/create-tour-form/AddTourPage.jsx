@@ -19,14 +19,13 @@ export default function CreateTourForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
-
   const [selectedImages, setSelectedImages] = useState([]);
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
 
   const [formData, setFormData] = useState({
     title: "",
-    ownerSlug: "", // ✅ اینجا ownerSlug داریم
+    ownerSlug: "",
     description: "",
     price: "",
     maxPeople: "",
@@ -45,10 +44,10 @@ export default function CreateTourForm() {
     seoSlug: "",
   });
 
-  const handleChange = (field, value) => {
+  const handleChange = (field, value) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
 
+  // برای اضافه کردن آیتم‌های آرایه‌ای
   const addArrayItem = (field, defaultValue = "") => {
     setFormData((prev) => ({
       ...prev,
@@ -63,35 +62,24 @@ export default function CreateTourForm() {
     }));
   };
 
-  // اعتبارسنجی فرم
   const validateForm = () => {
     const errors = [];
-
     if (!formData.title.trim()) errors.push("عنوان تور الزامی است");
     if (!formData.ownerSlug) errors.push("برگزارکننده الزامی است");
     if (!formData.description.trim() || formData.description.length < 10)
-      errors.push("توضیحات باید حداقل ۵۰ کاراکتر باشد");
+      errors.push("توضیحات باید حداقل ۱۰ کاراکتر باشد");
     if (!formData.price || Number(formData.price) <= 0)
       errors.push("قیمت معتبر وارد کنید");
     if (!formData.location.trim()) errors.push("مکان برگزاری الزامی است");
-
     return errors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // اعتبارسنجی
     const errors = validateForm();
-    if (errors.length > 0) {
-      errors.forEach((error) => toast.error(error));
-      setActiveTab("basic");
-      return;
-    }
-
-    // اعتبارسنجی مالک
-    if (!formData.ownerSlug) {
-      toast.error("لطفا برگزارکننده را انتخاب کنید");
+    if (errors.length) {
+      errors.forEach((e) => toast.error(e));
       setActiveTab("basic");
       return;
     }
@@ -99,24 +87,23 @@ export default function CreateTourForm() {
     setLoading(true);
 
     try {
-      // آماده‌سازی داده‌ها
       const payload = {
         ...formData,
-        images: selectedImages
-          .map((img) => {
-            // فقط URL تصاویر را بفرست
-            if (img.preview && img.preview.startsWith("blob:")) {
-              // در حالت واقعی باید عکس‌ها را آپلود کنید
-              // فعلاً فقط blob URL را می‌فرستیم
-              return img.preview;
-            }
-            return img.url || img.preview || "";
-          })
-          .filter((url) => url), // حذف مقادیر خالی
-        startDate: startDate ? startDate.toISOString() : null,
-        endDate: endDate ? endDate.toISOString() : null,
         price: Number(formData.price),
         maxPeople: formData.maxPeople ? Number(formData.maxPeople) : null,
+        // فقط URLهای معتبر (http://, https://, /uploads/)
+        images: selectedImages
+          .map((img) => img.url || img.preview)
+          .filter(
+            (url) =>
+              url &&
+              (url.startsWith("http://") ||
+                url.startsWith("https://") ||
+                url.startsWith("/uploads/") ||
+                url.startsWith("data:image/"))
+          ),
+        startDate: startDate?.toISOString() || null,
+        endDate: endDate?.toISOString() || null,
         schedule: formData.schedule
           .filter((day) => day.title.trim() || day.description.trim())
           .map((day, index) => ({
@@ -124,10 +111,9 @@ export default function CreateTourForm() {
             title: day.title.trim(),
             description: day.description.trim(),
           })),
-        // تبدیل ownerSlug به ownerId در سمت سرور انجام می‌شود
       };
 
-      console.log("📦 Submitting payload:", JSON.stringify(payload, null, 2));
+      console.log("📦 Submitting payload:", payload);
 
       const res = await fetch("/api/tours/create", {
         method: "POST",
@@ -137,8 +123,6 @@ export default function CreateTourForm() {
 
       const result = await res.json();
 
-      console.log("✅ Create response:", result);
-
       if (!res.ok) {
         throw new Error(result.message || "خطا در ایجاد تور");
       }
@@ -147,7 +131,7 @@ export default function CreateTourForm() {
 
       // تأخیر قبل از ریدایرکت
       setTimeout(() => {
-        router.push(`${slug}/panel/tours`);
+        router.push("/tours");
       }, 1500);
     } catch (err) {
       console.error("❌ Submit error:", err);
@@ -157,16 +141,17 @@ export default function CreateTourForm() {
     }
   };
 
-  // پیشنهاد slug از عنوان
   useEffect(() => {
     if (formData.title && !formData.seoSlug) {
-      const slug = formData.title
-        .toLowerCase()
-        .replace(/[^a-z0-9\u0600-\u06FF\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim();
-      handleChange("seoSlug", slug);
+      handleChange(
+        "seoSlug",
+        formData.title
+          .toLowerCase()
+          .replace(/[^a-z0-9\u0600-\u06FF\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .trim()
+      );
     }
   }, [formData.title]);
 

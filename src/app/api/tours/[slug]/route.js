@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 export async function GET(request, context) {
   try {
     const params = await context.params;
-    const slug = params.slug;
+    const slug = decodeURIComponent(params.slug);
 
     // گرفتن تور
     const tourResults = await db

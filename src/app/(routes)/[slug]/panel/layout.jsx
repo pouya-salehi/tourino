@@ -9,7 +9,7 @@ import {
   MonitorCog,
   CircleAlert,
   Image,
-  Tent
+  Tent,
 } from "lucide-react";
 import { motion } from "framer-motion";
 export default function PanelLayout({ children }) {

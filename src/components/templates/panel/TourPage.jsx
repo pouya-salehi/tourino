@@ -76,7 +76,7 @@ export default function ProfilePage({ slug }) {
   if (error) {
     return (
       <div className="p-4">
-        <div className="max-w-md w-full text-center">
+        <div className="w-full text-center">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <AlertCircle className="w-10 h-10 text-red-600" />
           </div>
@@ -113,18 +113,9 @@ export default function ProfilePage({ slug }) {
   return (
     <div className="min-h-screen">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* هدر پروفایل */}
         <ProfileHeader profile={profile} />
-
-        {/* اکشن‌ها */}
         <ProfileActions profile={profile} slug={slug} />
-        {/* آمار و اطلاعات */}
-        {/* <ProfileStats profile={profile} toursCount={tours.length} /> */}
-
-        {/* تورها */}
         <ProfileTours tours={tours} profile={profile} />
-
-        {/* فوتر */}
         <div className="mt-12 pt-6 border-t border-gray-200 text-center">
           <p className="text-sm text-gray-500">
             صفحه شخصی {profile.name} | عضویت از {profile.joinDate}

@@ -1,4 +1,4 @@
-// /app/api/tours/route.js
+//app/api/tours/create
 import { NextResponse } from "next/server";
 import db from "@/db";
 import { tours, users } from "@/db/schema";
@@ -6,16 +6,12 @@ import { eq } from "drizzle-orm";
 
 export async function POST(request) {
   try {
-    console.log("🚀 Creating new tour...");
-
-    // دریافت داده‌ها
+    // ✅ دریافت body
     const body = await request.json();
-    console.log("📦 Request body:", JSON.stringify(body, null, 2));
 
-    // استخراج فیلدها
     const {
       title,
-      ownerSlug, // ما ownerSlug دریافت می‌کنیم
+      ownerSlug,
       description,
       price,
       maxPeople,
@@ -37,26 +33,22 @@ export async function POST(request) {
       endDate,
     } = body;
 
-    // اعتبارسنجی فیلدهای ضروری
+    // ❗ اعتبارسنجی
     if (!title || !ownerSlug || !description || !price || !location) {
-      console.error("❌ Missing required fields");
       return NextResponse.json(
         { success: false, message: "فیلدهای ضروری را پر کنید" },
         { status: 400 }
       );
     }
 
-    // 🔍 پیدا کردن ownerId از روی ownerSlug
-    console.log("🔍 Finding owner by slug:", ownerSlug);
-
+    // 🔍 پیدا کردن ownerId
     const ownerResult = await db
       .select({ id: users.id })
       .from(users)
       .where(eq(users.slug, ownerSlug))
       .limit(1);
 
-    if (!ownerResult || ownerResult.length === 0) {
-      console.error("❌ Owner not found for slug:", ownerSlug);
+    if (!ownerResult.length) {
       return NextResponse.json(
         { success: false, message: "مالک تور یافت نشد" },
         { status: 404 }
@@ -64,114 +56,104 @@ export async function POST(request) {
     }
 
     const ownerId = ownerResult[0].id;
-    console.log("✅ Owner ID found:", ownerId);
 
-    // تبدیل schedule به آرایه متن (اگر object است)
-    let formattedSchedule = [];
-    if (Array.isArray(schedule)) {
-      formattedSchedule = schedule.map((day) => {
-        if (typeof day === "object") {
-          return JSON.stringify(day); // یا format دلخواه
-        }
-        return day;
-      });
-    }
+    // ✅ schedule → string
+    const formattedSchedule = Array.isArray(schedule)
+      ? schedule.map((day) =>
+          typeof day === "object" ? JSON.stringify(day) : day
+        )
+      : [];
 
-    // تبدیل images به آرایه معتبر
-    let formattedImages = [];
-    if (Array.isArray(images)) {
-      formattedImages = images
-        .map((img) => {
-          // اگر object است و preview دارد، از preview استفاده کن
-          if (img && typeof img === "object" && img.preview) {
-            return img.preview;
-          }
-          // اگر string است
-          if (typeof img === "string") {
-            return img;
-          }
-          return "";
-        })
-        .filter((img) => img);
-    }
+    // ✅ images → فیلتر کردن URLهای معتبر (HTTP, HTTPS یا مسیرهای نسبی)
+    const formattedImages = Array.isArray(images)
+      ? images
+          .map((img) => {
+            if (typeof img !== "string") return null;
+            // قبول کردن:
+            // 1. URLهای کامل (http://, https://)
+            // 2. مسیرهای نسبی (/uploads/...)
+            // 3. داده‌های base64 (data:image/...)
+            if (
+              img.startsWith("http://") ||
+              img.startsWith("https://") ||
+              img.startsWith("/") ||
+              img.startsWith("data:image/")
+            ) {
+              return img;
+            }
+            return null;
+          })
+          .filter(Boolean) // حذف nullها
+      : [];
 
-    // ایجاد slug اگر وجود ندارد
+    // ✅ slug
     const finalSlug =
       seoSlug ||
       title
         .toLowerCase()
         .replace(/[^a-z0-9\u0600-\u06FF\s-]/g, "")
         .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
         .trim();
 
-    console.log("📝 Preparing tour data for insert...");
+    // 🧾 insert
+    const [tour] = await db
+      .insert(tours)
+      .values({
+        ownerId,
+        title,
+        slug: finalSlug,
+        description,
+        price: Number(price),
+        maxPeople: maxPeople ? Number(maxPeople) : null,
+        images: formattedImages,
+        location,
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        features,
+        includes,
+        excludes,
+        schedule: formattedSchedule,
+        faqs,
+        enableComments,
+        showLikes,
+        showRating,
+        metaTitle,
+        metaDescription,
+        metaKeywords,
+      })
+      .returning();
 
-    // 🧾 ایجاد تور جدید
-    try {
-      const [tour] = await db
-        .insert(tours)
-        .values({
-          ownerId, // ✅ حالا ownerId داریم
-          title,
-          slug: finalSlug,
-          description,
-          price: parseInt(price),
-          maxPeople: maxPeople ? parseInt(maxPeople) : null,
-          images: formattedImages,
-          location,
-          startDate: startDate ? new Date(startDate) : null,
-          endDate: endDate ? new Date(endDate) : null,
-          features: Array.isArray(features) ? features : [],
-          includes: Array.isArray(includes) ? includes : [],
-          excludes: Array.isArray(excludes) ? excludes : [],
-          schedule: formattedSchedule,
-          faqs: Array.isArray(faqs) ? faqs : [],
-          enableComments,
-          showLikes,
-          showRating,
-          metaTitle,
-          metaDescription,
-          metaKeywords: Array.isArray(metaKeywords) ? metaKeywords : [],
-        })
-        .returning();
-
-      console.log("✅ Tour created successfully:", tour.id);
-
-      return NextResponse.json({
-        success: true,
-        message: "تور با موفقیت ایجاد شد",
-        tour,
-      });
-    } catch (dbError) {
-      console.error("❌ Database error:", dbError);
-
-      // خطای دقیق‌تر
-      if (dbError.message?.includes("unique constraint")) {
-        return NextResponse.json(
-          { success: false, message: "اسلاگ تکراری است" },
-          { status: 400 }
-        );
-      }
-
-      if (dbError.message?.includes("foreign key constraint")) {
-        return NextResponse.json(
-          { success: false, message: "مالک معتبر نیست" },
-          { status: 400 }
-        );
-      }
-
-      throw dbError;
-    }
+    return NextResponse.json({
+      success: true,
+      message: "تور با موفقیت ایجاد شد",
+      tour,
+    });
   } catch (error) {
     console.error("❌ POST tour error:", error);
+
+    // خطاهای دیتابیس
+    if (error.code === "23505") {
+      // PostgreSQL unique violation
+      return NextResponse.json(
+        { success: false, message: "اسلاگ تکراری است" },
+        { status: 400 }
+      );
+    }
+
+    if (error.message?.includes("foreign key constraint")) {
+      return NextResponse.json(
+        { success: false, message: "مالک معتبر نیست" },
+        { status: 400 }
+      );
+    }
 
     return NextResponse.json(
       {
         success: false,
         message: "خطا در ایجاد تور",
-        error: error.message,
-        details:
-          process.env.NODE_ENV === "development" ? error.stack : undefined,
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       },
       { status: 500 }
     );

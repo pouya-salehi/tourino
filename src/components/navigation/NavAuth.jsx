@@ -1,7 +1,15 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { User, LogOut, Settings, LogIn, FileInput, House } from "lucide-react";
+import {
+  UserRound,
+  LogOut,
+  Settings,
+  LogIn,
+  FileInput,
+  House,
+  CircleUserRound,
+} from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "../ui/button";
@@ -69,7 +77,7 @@ export default function UserMenu() {
                 className="rounded-full p-4 cursor-pointer"
                 onClick={() => setOpen((v) => !v)}
               >
-                <User size={22} />
+                <UserRound size={22} />
               </Button>
             </DropdownMenuTrigger>
 
@@ -85,8 +93,11 @@ export default function UserMenu() {
 
               <DropdownMenuGroup>
                 <DropdownMenuItem>
-                  <Link href={getPanel()} className="flex items-center py-2 gap-2">
-                    <Settings size={18} />
+                  <Link
+                    href={getPanel()}
+                    className="flex items-center py-2 gap-2"
+                  >
+                    <CircleUserRound size={18} />
                     حساب کاربری
                   </Link>
                 </DropdownMenuItem>
@@ -102,7 +113,7 @@ export default function UserMenu() {
 
               <DropdownMenuItem onClick={handleLogout}>
                 <span className="flex py-2 gap-2 items-center text-red-600 cursor-pointer">
-                  <LogOut size={18} color="#EE4B2B"/>
+                  <LogOut size={18} color="#EE4B2B" />
                   خروج
                 </span>
               </DropdownMenuItem>

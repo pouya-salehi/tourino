@@ -27,12 +27,12 @@ export default function MediaGallery({ images = [], onRemove }) {
             className="relative group rounded-lg overflow-hidden border"
           >
             <div className="w-full h-36 relative overflow-hidden">
-              <Image
-                src={img.preview}
+              {/* راه حل: از img ساده استفاده کنید */}
+              <img
+                src={img.preview || img.url}
                 alt={img.name || `عکس ${index + 1}`}
-                width={40}
-                height={40}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
             </div>
 
