@@ -10,7 +10,6 @@ export default function GoToTour() {
   const { user } = useAuth();
   const [ownerSlug, setOwnerSlug] = useState(null);
   const [loading, setLoading] = useState(true);
-
   const fetchProfile = useCallback(async () => {
     if (!user || user.role !== "OWNER") {
       setLoading(false);

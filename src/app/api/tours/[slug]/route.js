@@ -57,12 +57,30 @@ export async function GET(request, context) {
         description: tour.description,
         price: tour.price,
         images: tour.images || [],
+        location: tour.location,
         startDate: tour.startDate,
         endDate: tour.endDate,
         maxPeople: tour.maxPeople,
+
+        // 🔥 اینا رو جا انداخته بودی
+        features: tour.features || [],
+        includes: tour.includes || [],
+        excludes: tour.excludes || [],
+        schedule: tour.schedule || [],
+        faqs: tour.faqs || [],
+
+        enableComments: tour.enableComments,
+        showLikes: tour.showLikes,
+        showRating: tour.showRating,
+
+        metaTitle: tour.metaTitle,
+        metaDescription: tour.metaDescription,
+        metaKeywords: tour.metaKeywords || [],
+
         ownerId: tour.ownerId,
         createdAt: tour.createdAt,
-        owner: owner,
+
+        owner,
         banner:
           Array.isArray(tour.images) && tour.images.length > 0
             ? tour.images[0]

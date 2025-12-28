@@ -47,7 +47,7 @@ export default function TourRow({
       : index + 1;
 
   return (
-    <TableRow className="even:bg-gray-50">
+    <TableRow className="even:bg-gray-50 dark:even:bg-black/40">
       <TableCell>{rowNumber}</TableCell>
 
       <TableCell>

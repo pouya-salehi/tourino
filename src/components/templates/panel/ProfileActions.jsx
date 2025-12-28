@@ -6,20 +6,18 @@ import {
   Phone,
   MessageSquare,
   Share2,
-  Mail,
+  PanelsLeftBottom,
   Calendar,
-  Users,
+  BadgePlus,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-
+import { useParams } from "next/navigation";
 export default function ProfileActions({ profile, slug }) {
   const { user } = useAuth();
   const router = useRouter();
-
   // اگر کاربر مالک این پروفایله
-  const isOwner = user?.slug === slug;
-
+  const isOwner = user.role;
   const handleCall = () => {
     if (profile.phone) {
       window.open(`tel:${profile.phone}`, "_blank");
@@ -31,16 +29,16 @@ export default function ProfileActions({ profile, slug }) {
     toast.info(`ارسال پیام به ${profile.name}`);
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: profile.name,
-        text: `صفحه شخصی ${profile.name} در کاپرتور`,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success("لینک کپی شد!");
+  const handleShare = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const link = `${window.location.origin}/${slug}`;
+      await navigator.clipboard.writeText(link);
+      toast.success("لینک با موفقیت کپی شد");
+    } catch (err) {
+      toast.error("خطا در کپی لینک" || err);
     }
   };
 
@@ -49,12 +47,12 @@ export default function ProfileActions({ profile, slug }) {
   };
 
   const handleCreateTour = () => {
-    router.push(`/${slug}/panel/tours/new`);
+    router.push(`/${slug}/panel/add-tour`);
   };
 
   return (
-    <div className="bg-white mb-8">
-      <div className="flex flex-wrap gap-3 justify-center md:justify-between">
+    <div className="flex mb-8">
+      <div className="flex flex-wrap gap-3 justify-between lg:justify-between w-full">
         {/* اکشن‌های عمومی */}
         <div className="flex flex-wrap gap-3">
           {profile.phone && (
@@ -70,7 +68,7 @@ export default function ProfileActions({ profile, slug }) {
           <Button
             onClick={handleMessage}
             variant="outline"
-            className="border-blue-600 text-blue-600 hover:bg-blue-50"
+            className="bg-white border-none hover:bg-blue-50"
           >
             <MessageSquare className="w-4 h-4 ml-2" />
             پیام
@@ -79,7 +77,7 @@ export default function ProfileActions({ profile, slug }) {
           <Button
             onClick={handleShare}
             variant="outline"
-            className="border-purple-600 text-purple-600 hover:bg-purple-50"
+            className="bg-white border-none hover:bg-purple-50"
           >
             <Share2 className="w-4 h-4 ml-2" />
             اشتراک‌گذاری
@@ -87,26 +85,28 @@ export default function ProfileActions({ profile, slug }) {
         </div>
 
         {/* اکشن‌های مخصوص مالک */}
-        {isOwner && (
-          <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={handleGoToPanel}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              <Users className="w-4 h-4 ml-2" />
-              پنل مدیریت
-            </Button>
+        <div>
+          {isOwner && (
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={handleGoToPanel}
+                className=" bg-gradient-to-r from-indigo-500 to-purple-500"
+              >
+                <PanelsLeftBottom className="w-4 h-4 ml-2" />
+                پنل مدیریت
+              </Button>
 
-            <Button
-              onClick={handleCreateTour}
-              variant="outline"
-              className="border-green-600 text-green-600 hover:bg-green-50"
-            >
-              <Calendar className="w-4 h-4 ml-2" />
-              ساخت تور جدید
-            </Button>
-          </div>
-        )}
+              <Button
+                onClick={handleCreateTour}
+                variant="outline"
+                className="bg-white border-none hover:bg-green-50"
+              >
+                <BadgePlus className="w-4 h-4 ml-2" />
+                ساخت تور جدید
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

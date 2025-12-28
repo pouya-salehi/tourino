@@ -131,7 +131,7 @@ export default function TourManagementPage() {
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={handleExport} variant="outline">
+          <Button onClick={handleExport} variant="outline" className="dark:text-white dark:border-white">
             <Download className="h-4 w-4 ml-2" />
             خروجی
           </Button>
@@ -153,7 +153,7 @@ export default function TourManagementPage() {
 
       {/* تب‌های مختلف */}
       <Tabs value={activeTab} onValueChange={handleStatusChange}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-3 dark:bg-transparent">
           <TabsTrigger value="all">همه تورها</TabsTrigger>
           <TabsTrigger value="active">فعال</TabsTrigger>
           <TabsTrigger value="expired">منقضی شده</TabsTrigger>

@@ -9,6 +9,7 @@ import {
   Phone,
   MessageCircle,
   Clock,
+  UserRound,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,18 +28,18 @@ function TourBookingCard({ tour, peopleCount, setPeopleCount, formatDate }) {
     : null;
 
   return (
-    <Card className="sticky top-24 border-2 shadow-2xl shadow-primary/10">
+    <Card className="sticky top-24 shadow-xl rounded-4xl dark:border bg-transparent">
       <CardContent className="p-6">
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 mb-4">
-            <Badge variant="destructive" className="animate-pulse">
+            <Badge variant="destructive" className="animate-pulse px-4 py-2">
               ⚡ ویژه
             </Badge>
             <span className="text-sm font-semibold">تضمین بهترین قیمت</span>
           </div>
 
           <div className="flex items-baseline justify-center gap-2 mb-2">
-            <span className="text-4xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <span className="text-4xl font-black">
               {finalPrice.toLocaleString()}
             </span>
             <span className="text-gray-500">تومان</span>
@@ -50,8 +51,9 @@ function TourBookingCard({ tour, peopleCount, setPeopleCount, formatDate }) {
             </div>
           )}
 
-          <div className="text-sm text-emerald-600 font-semibold mb-4">
-            ⭐ قیمت به ازای هر نفر: {tour.price.toLocaleString()} تومان
+          <div className="text-sm text-emerald-500 font-semibold mb-4 flex items-center text-center w-full justify-center">
+            <UserRound /> قیمت به ازای هر نفر: {tour.price.toLocaleString()}{" "}
+            تومان
           </div>
         </div>
 
@@ -65,10 +67,11 @@ function TourBookingCard({ tour, peopleCount, setPeopleCount, formatDate }) {
               <Users className="h-4 w-4" />
               تعداد نفرات
             </Label>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+            <div className="flex items-center justify-between p-3 rounded-lg">
               <Button
                 variant="outline"
                 size="icon"
+                className="dark:border-white dark:text-white"
                 onClick={() => setPeopleCount((prev) => Math.max(1, prev - 1))}
                 disabled={peopleCount <= 1}
               >
@@ -77,12 +80,13 @@ function TourBookingCard({ tour, peopleCount, setPeopleCount, formatDate }) {
 
               <div className="text-center">
                 <div className="text-2xl font-bold">{peopleCount}</div>
-                <div className="text-sm text-gray-500">نفر</div>
+                <div className="text-sm text-gray-500 dark:text-white">نفر</div>
               </div>
 
               <Button
                 variant="outline"
                 size="icon"
+                className="dark:border-white dark:text-white"
                 onClick={() =>
                   setPeopleCount((prev) =>
                     tour.maxPeople
@@ -104,11 +108,11 @@ function TourBookingCard({ tour, peopleCount, setPeopleCount, formatDate }) {
               تاریخ سفر
             </Label>
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-lg bg-gray-50 text-center">
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-transparent text-center">
                 <div className="text-sm text-gray-500">شروع</div>
                 <div className="font-bold">{formatDate(tour.startDate)}</div>
               </div>
-              <div className="p-3 rounded-lg bg-gray-50 text-center">
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-transparent text-center">
                 <div className="text-sm text-gray-500">پایان</div>
                 <div className="font-bold">{formatDate(tour.endDate)}</div>
               </div>
@@ -130,18 +134,6 @@ function TourBookingCard({ tour, peopleCount, setPeopleCount, formatDate }) {
               />
             </div>
           )}
-
-          {/* Security Badges */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col items-center p-3 rounded-lg bg-emerald-50 border border-emerald-100">
-              <ShieldCheck className="h-6 w-6 text-emerald-600 mb-2" />
-              <span className="text-xs text-center">پرداخت امن</span>
-            </div>
-            <div className="flex flex-col items-center p-3 rounded-lg bg-blue-50 border border-blue-100">
-              <CreditCard className="h-6 w-6 text-blue-600 mb-2" />
-              <span className="text-xs text-center">ضمانت بازگشت وجه</span>
-            </div>
-          </div>
 
           {/* CTA Button */}
           <Dialog>
@@ -168,11 +160,11 @@ function TourBookingCard({ tour, peopleCount, setPeopleCount, formatDate }) {
 
           {/* Alternative Actions */}
           <div className="flex gap-3">
-            <Button variant="outline" className="flex-1">
+            <Button variant="outline" className="flex-1 dark:text-white dark:border-white">
               <MessageCircle className="h-4 w-4 ml-2" />
               گفتگو
             </Button>
-            <Button variant="outline" className="flex-1">
+            <Button variant="outline" className="flex-1 dark:text-white dark:border-white">
               <Phone className="h-4 w-4 ml-2" />
               تماس
             </Button>

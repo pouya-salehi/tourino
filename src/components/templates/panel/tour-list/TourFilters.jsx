@@ -19,7 +19,7 @@ export default function TourFilters({
   onRefresh,
 }) {
   return (
-    <Card>
+    <Card className="">
       <CardContent className="pt-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* جستجو */}
@@ -36,7 +36,7 @@ export default function TourFilters({
           {/* فیلتر وضعیت */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
+              <Button variant="outline" className="w-full justify-between dark:text-white dark:border-white">
                 <Filter className="h-4 w-4 ml-2" />
                 {filters.status === "all"
                   ? "همه وضعیت‌ها"
@@ -46,7 +46,7 @@ export default function TourFilters({
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className="w-sm">
               <DropdownMenuLabel>فیلتر وضعیت</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onStatusChange("all")}>
@@ -64,7 +64,7 @@ export default function TourFilters({
           {/* مرتب‌سازی */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
+              <Button variant="outline" className="w-full justify-between dark:text-white dark:border-white">
                 مرتب‌سازی:{" "}
                 {filters.sortBy === "createdAt"
                   ? "تاریخ ایجاد"
@@ -79,7 +79,7 @@ export default function TourFilters({
             <DropdownMenuContent>
               <DropdownMenuLabel>مرتب‌سازی بر اساس</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onSort("createdAt")}>
+              <DropdownMenuItem onClick={() => onSort("createdAt")} className="w-sm">
                 تاریخ ایجاد{" "}
                 {filters.sortBy === "createdAt" &&
                   (filters.sortOrder === "asc" ? "↑" : "↓")}
@@ -103,7 +103,7 @@ export default function TourFilters({
           </DropdownMenu>
 
           {/* Refresh */}
-          <Button onClick={onRefresh} variant="outline">
+          <Button onClick={onRefresh} variant="outline" className="dark:text-white dark:border-white">
             <RefreshCw className="h-4 w-4 ml-2" />
             به‌روزرسانی
           </Button>

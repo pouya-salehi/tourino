@@ -1,53 +1,88 @@
-// components/panel/tour-detail/TourFeatures.jsx
 import { motion } from "framer-motion";
-import { CheckCircle, ChevronRight } from "lucide-react";
+import { Check, Package, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 function TourFeatures({ tour, showAllFeatures, setShowAllFeatures }) {
   return (
-    <Card>
-      <CardContent className="p-6">
-        <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-          <CheckCircle className="h-6 w-6 text-emerald-500" />
-          امکانات و خدمات
-        </h2>
+    <div className="min-h-86 shadow-xl rounded-4xl p-4 dark:border">
+      <h2 className="text-2xl font-bold  py-6 flex items-center gap-2 text-gray-500 dark:text-white">
+        <Sparkles />
+        امکانات و خدمات تور
+      </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {tour.features
-            ?.slice(0, showAllFeatures ? undefined : 6)
-            .map((feature, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-gray-50 to-white hover:from-gray-100 transition-all"
-              >
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                </div>
-                <span className="font-medium">{feature}</span>
-              </motion.div>
-            ))}
-        </div>
+      <Accordion
+        type="multiple"
+        defaultValue={["features"]}
+        className="w-full space-y-4"
+      >
+        {/* امکانات تور */}
+        <AccordionItem value="features" className="border rounded-2xl px-4">
+          <AccordionTrigger className="text-lg font-semibold cursor-pointer">
+            <div className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-primary" />
+              امکانات تور
+            </div>
+          </AccordionTrigger>
 
-        {tour.features?.length > 6 && (
-          <Button
-            variant="ghost"
-            className="mt-6 w-full"
-            onClick={() => setShowAllFeatures(!showAllFeatures)}
-          >
-            {showAllFeatures ? "نمایش کمتر" : "نمایش همه امکانات"}
-            <ChevronRight
-              className={`h-4 w-4 transition-transform ${
-                showAllFeatures ? "rotate-90" : ""
-              }`}
-            />
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+          <AccordionContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-4">
+              {tour.features
+                ?.slice(0, showAllFeatures ? undefined : 6)
+                .map((feature, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-muted/70 transition dark:bg-black/10"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-gray/50 shadow flex items-center justify-center">
+                      <Check className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="font-medium">{feature}</span>
+                  </motion.div>
+                ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="includes" className="border rounded-2xl px-4 ">
+          <AccordionTrigger className="text-lg font-semibold cursor-pointer">
+            <div className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-primary" />
+              شامل می‌شود
+            </div>
+          </AccordionTrigger>
+
+          <AccordionContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {tour.includes
+                ?.slice(0, showAllFeatures ? undefined : 6)
+                .map((feature, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-muted/70 transition dark:bg-black/10"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-gray/50 shadow flex items-center justify-center">
+                      <Check className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="font-medium">{feature}</span>
+                  </motion.div>
+                ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
   );
 }
 

@@ -1,4 +1,4 @@
-// /app/api/tours/route.js
+// /app/api/tours/route.js - اصلاح شده
 import { NextResponse } from "next/server";
 import db from "@/db";
 import { tours, users } from "@/db/schema";
@@ -108,11 +108,13 @@ export async function GET(request) {
         id: tours.id,
         title: tours.title,
         slug: tours.slug,
+        description: tours.description, // اضافه کردن description
         price: tours.price,
         location: tours.location,
         startDate: tours.startDate,
         endDate: tours.endDate,
         maxPeople: tours.maxPeople,
+        images: tours.images, // ✅ تصاویر
         enableComments: tours.enableComments,
         showLikes: tours.showLikes,
         showRating: tours.showRating,
@@ -122,6 +124,9 @@ export async function GET(request) {
           name: users.name,
           slug: users.slug,
           phone: users.phone,
+          avatar: users.avatar, // ✅ آواتار صاحب تور
+          city: users.city,
+          verifyStatus: users.verifyStatus,
         },
       })
       .from(tours)
@@ -154,6 +159,13 @@ export async function GET(request) {
     const totalPages = Math.ceil(totalCount / limit);
 
     console.log(`✅ Tours fetched: ${data.length}/${totalCount}`);
+
+    // لاگ برای دیباگ
+    console.log("Sample tour data:", {
+      hasImages: data[0]?.images?.length > 0,
+      imageUrl: data[0]?.images?.[0],
+      ownerAvatar: data[0]?.owner?.avatar,
+    });
 
     return NextResponse.json({
       success: true,

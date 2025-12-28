@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import {
   UserRound,
   LogOut,
-  Settings,
+  Mail,
   LogIn,
   FileInput,
   House,
@@ -26,10 +26,9 @@ import {
 
 export default function UserMenu() {
   const { user } = useAuth();
+  console.log(user);
   const [open, setOpen] = useState(false);
-  const slug = useParams();
   const menuRef = useRef();
-
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/signin";
@@ -47,9 +46,9 @@ export default function UserMenu() {
 
   const getPanel = () => {
     if (!user) return "/signin";
-    if (user.role === "client") return "/client";
-    if (user.role === "owner") return `/${user.slug}/panel`;
-    if (user.role === "admin") return "/owner";
+    if (user.role === "CLIENT") return "/client";
+    if (user.role === "OWNER") return `/${user.slug}/panel`;
+    if (user.role === "ADMIN") return "/owner";
     return "/client";
   };
 
@@ -107,6 +106,20 @@ export default function UserMenu() {
                   <Link href="/" className="flex items-center py-2 gap-2">
                     <House size={18} />
                     صفحه اصلی
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuGroup>
+                <DropdownMenuItem>
+                  <Link
+                    href={`/${user.slug}/panel/messages`}
+                    className="flex items-center py-2 gap-2"
+                  >
+                    <div>
+                      <Mail size={18} className="relative" />
+                      <span className="w-2 h-2 rounded-full bg-red-500 absolute top-4 left-2"></span>
+                    </div>
+                    پیام های دریافتی
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>

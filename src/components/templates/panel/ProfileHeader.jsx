@@ -12,10 +12,10 @@ import {
   ShieldCheck,
   ShieldBan,
 } from "lucide-react";
-
-export default function ProfileHeader({ profile }) {
+import { Separator } from "@/components/ui/separator";
+export default function ProfileHeader({ profile, tours }) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+    <div className="rounded-2xl shadow-lg p-6 mb-8">
       <div className="flex flex-col md:flex-row items-center gap-6">
         {/* آواتار (مثل تلگرام) */}
         <div className="relative">
@@ -44,16 +44,18 @@ export default function ProfileHeader({ profile }) {
         <div className="flex-1 text-center md:text-right">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {profile.name}
               </h1>
 
               <div className="flex items-center justify-center md:justify-start gap-2 mt-2">
-                <span className="text-gray-600">{profile.slug}@</span>
+                <span className="text-gray-600 dark:text-white">
+                  {profile.slug}@
+                </span>
 
                 {profile.role === "OWNER" && (
-                  <Badge className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700">
-                    <Shield className="w-3 h-3 ml-1" />
+                  <Badge className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:text-white">
+                    <Shield className="w-3 h-3 ml-1 " />
                     صاحب تور
                   </Badge>
                 )}
@@ -71,24 +73,19 @@ export default function ProfileHeader({ profile }) {
 
             {/* اطلاعات تماس */}
             <div className="flex flex-col gap-2">
-              {profile.phone && (
-                <div className="flex items-center gap-2 text-gray-700">
-                  <Phone className="w-4 h-4 text-blue-600" />
-                  <span>{profile.phone}</span>
-                </div>
-              )}
-
-              {profile.city && (
-                <div className="flex items-center gap-2 text-gray-700">
-                  <MapPin className="w-4 h-4 text-red-600" />
-                  <span>{profile.city}</span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 text-gray-700">
-                <Calendar className="w-4 h-4 text-green-600" />
-                <span>عضویت: {profile.joinDate}</span>
-              </div>
+              <ul className="flex gap-4 mt-4 h-5 items-center justify-center space-x-1 text-sm">
+                <li className="flex flex-col items-center">
+                  <span>دنبال کننده ها</span>
+                  <span>0</span>
+                </li>
+                <Separator orientation="vertical" />
+                <li className="flex flex-col items-center">
+                  <span>تعداد تورها</span>
+                  <strong className="text-gray-600 dark:text-white">
+                    {tours.length}
+                  </strong>
+                </li>
+              </ul>
             </div>
           </div>
 

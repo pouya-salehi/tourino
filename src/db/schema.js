@@ -122,6 +122,44 @@ export const tours = pgTable("tours", {
   metaKeywords: text("meta_keywords").array().default([]),
   createdAt: timestamp("created_at").defaultNow(),
 });
+// -------------------- COMMENTS --------------------
+export const comments = pgTable("comments", {
+  id: serial("id").primaryKey(),
+
+  // ارتباط‌ها
+  tourId: integer("tour_id")
+    .references(() => tours.id, { onDelete: "cascade" })
+    .notNull(),
+
+  userId: integer("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+
+  // برای reply
+  parentId: integer("parent_id").references(() => comments.id),
+
+  // محتوا
+  content: text("content").notNull(),
+
+  // وضعیت
+  isDeleted: boolean("is_deleted").default(false),
+
+  createdAt: timestamp("created_at").defaultNow(),
+});
+// -------------------- COMMENT LIKES --------------------
+export const commentLikes = pgTable("comment_likes", {
+  id: serial("id").primaryKey(),
+
+  commentId: integer("comment_id")
+    .references(() => comments.id, { onDelete: "cascade" })
+    .notNull(),
+
+  userId: integer("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 // -------------------- BOOKINGS --------------------
 export const bookings = pgTable("bookings", {
@@ -151,6 +189,20 @@ export const verificationDocuments = pgTable("verification_documents", {
 
   status: verifyEnum("verify_status").default("PENDING"),
   adminNote: text("admin_note"),
+
+  createdAt: timestamp("created_at").defaultNow(),
+});
+// -------------------- FOLLOW --------------------
+export const follows = pgTable("follows", {
+  id: serial("id").primaryKey(),
+
+  followerId: integer("follower_id")
+    .references(() => users.id)
+    .notNull(),
+
+  followingId: integer("following_id")
+    .references(() => users.id)
+    .notNull(),
 
   createdAt: timestamp("created_at").defaultNow(),
 });

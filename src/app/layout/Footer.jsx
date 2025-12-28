@@ -1,5 +1,6 @@
-import { Instagram, TentTree, Mail, Phone, MapPin, Zap } from "lucide-react";
-
+import { Instagram, TentTree, Mail, Phone, MapPin, Youtube } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 export default function Footer() {
   const socialLinks = [
     {
@@ -7,6 +8,12 @@ export default function Footer() {
       href: "https://www.instagram.com/couper.ir/",
       label: "Instagram",
       title: "instagram",
+    },
+    {
+      icon: Youtube,
+      href: "https://www.instagram.com/couper.ir/",
+      label: "Youtube",
+      title: "Youtube",
     },
   ];
 
@@ -27,16 +34,16 @@ export default function Footer() {
               <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
                 <TentTree className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <div className="font-black text-2xl text-indigo-600">
+              <div className="flex flex-col">
+                <Link href="/" className="font-black text-2xl text-indigo-600">
                   GotoTour
-                </div>
-                <div className="text-xs text-gray-700 font-semibold tracking-widest">
+                </Link>
+                <Link href="https://couper.ir" className="text-xs text-gray-700 dark:text-white font-semibold tracking-widest">
                   By CouperStudio
-                </div>
+                </Link>
               </div>
             </div>
-            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+            <p className="text-gray-600 dark:text-white text-sm leading-relaxed mb-6">
               تبدیل رویایت به واقعیت
             </p>
             <div className="flex gap-3">
@@ -56,15 +63,15 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-bold text-gray-800 mb-6 text-lg">لینک ها</h3>
+            <h3 className="font-bold text-gray-800 dark:text-white mb-6 text-lg">لینک ها</h3>
             <ul className="space-y-3">
               {quickLinks.map((link, index) => (
                 <li key={index}>
                   <a
                     href={link.href}
-                    className="text-gray-600 hover:text-indigo-600 transition-colors duration-300 text-sm flex items-center gap-2 group"
+                    className="text-gray-600 dark:text-white/80 hover:text-indigo-600 transition-colors duration-300 text-sm flex items-center gap-2 group"
                   >
-                    <div className="w-1 h-1 rounded-full bg-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="w-1 h-1 rounded-full bg-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     {link.label}
                   </a>
                 </li>
@@ -74,33 +81,33 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-bold text-gray-800 mb-6 text-lg">
+            <h3 className="font-bold text-gray-800 mb-6 text-lg dark:text-white">
               با ما در تماس باشید
             </h3>
             <ul className="space-y-4">
               {contactInfo.map((info, index) => (
                 <li key={index} className="flex items-start gap-3 text-sm">
                   <info.icon className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-600">{info.text}</span>
+                  <span className="text-gray-600 dark:text-white">{info.text}</span>
                 </li>
               ))}
             </ul>
           </div>
-
-          {/* Empty column for balance */}
-          <div></div>
+          <div className="flex">
+            <img src="./images/enmad.png" alt="enmad" className="" />
+          </div>
         </div>
-
+        <Separator className="my-4 dark:bg-white/50" />
         {/* Bottom bar */}
-        <div className="pt-8 border-t border-gray-300">
+        <div className="pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-sm dark:text-white">
               © 2025 Couper studio. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <a
-                href="#"
-                className="text-gray-500 hover:text-indigo-600 transition-colors duration-300"
+                href="https://couper.ir"
+                className="text-gray-500 dark:text-white hover:text-indigo-600 transition-colors duration-300"
               >
                 ساخته شده در استدیو کوپر
               </a>
@@ -110,8 +117,8 @@ export default function Footer() {
       </div>
 
       {/* گرادینت‌های هماهنگ با layout */}
-      <div className="absolute w-[400px] h-[400px] bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 rounded-full blur-[120px] opacity-20 bottom-[-100px] left-[-100px] z-0"></div>
-      <div className="absolute w-[300px] h-[300px] bg-gradient-to-tr from-blue-200 via-indigo-200 to-sky-200 rounded-full blur-[100px] opacity-15 bottom-[-50px] right-[-50px] z-0"></div>
+      <div className="absolute w-[400px] h-[400px] bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 rounded-full blur-[120px] opacity-20 bottom-[-100px] left-[-100px] z-0 dark:opacity-0"></div>
+      <div className="absolute w-[300px] h-[300px] bg-gradient-to-tr from-blue-200 via-indigo-200 to-sky-200 rounded-full blur-[100px] opacity-15 bottom-[-50px] right-[-50px] z-0 dark:opacity-0"></div>
     </footer>
   );
 }

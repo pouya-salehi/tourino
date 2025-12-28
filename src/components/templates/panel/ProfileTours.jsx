@@ -21,7 +21,7 @@ export default function ProfileTours({ tours, profile }) {
           هنوز توری ثبت نشده است
         </h3>
 
-        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+        <p className="text-gray-600 mb-6 max-w-md mx-auto dark:text-white">
           {profile.name} هنوز هیچ توری ایجاد نکرده است.
           {profile.isOwner && "می‌توانید اولین تور خود را ایجاد کنید."}
         </p>
@@ -38,10 +38,10 @@ export default function ProfileTours({ tours, profile }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">
-          تورهای <span className="text-gray-500">{profile.slug}@</span>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          تورهای <span className="text-gray-500 dark:text-white">{profile.slug}@</span>
         </h2>
-        <span className="text-gray-600">{tours.length} تور</span>
+        <span className="text-gray-600 dark:text-white">{tours.length} تور</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">

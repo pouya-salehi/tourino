@@ -1,72 +1,138 @@
-// components/panel/tour-detail/TourHeader.jsx
-import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, MapPin, Users, ChevronRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
+import { MapPin } from "lucide-react";
 import TourActions from "./TourActions";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Phone, MessageCircle, Instagram } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
-function TourHeader({
-  tour,
-  selectedImage,
-  setSelectedImage,
-  handleShare,
-  isLiked,
-  setIsLiked,
-  remainingSpots,
-  formatDate,
-}) {
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  };
+function TourHeader({ tour, handleShare, isLiked, setIsLiked }) {
+  const ownerSlug = tour.owner?.slug;
 
   return (
-    // اگر فقط می‌خواهی دو ستون ساده داشته باشی:
-    <section className="w-full">
-      <div className="flex flex-col lg:flex-row items-stretch justify-between gap-12">
-        {/* تصویر - 50% عرض */}
-        <div className="lg:w-1/2">
-          <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl">
-            <img
-              src={tour.images?.[0] || "/placeholder.jpg"}
-              alt={tour.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute bottom-0 left-0 right-0 top-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent">
-              <div className="p-2 absolute top-0 left-0">
-                <TourActions
-                  isLiked={isLiked}
-                  setIsLiked={setIsLiked}
-                  handleShare={handleShare}
-                />
-              </div>
-              <div className="absolute bottom-0 right-0 p-2">
-                <h2 className="bg-gradient-to-r from-white via-white/60 to-white text-transparent bg-clip-text text-4xl">
-                  {tour.title}
-                </h2>
-              </div>
-            </div>
-          </div>
-        </div>
+    <motion.section
+      initial="rest"
+      whileHover="hover"
+      animate="rest"
+      className="relative h-[80vh] rounded-[40px] overflow-hidden shadow-xl"
+    >
+      <motion.div
+        variants={{
+          rest: { scale: 1 },
+          hover: { scale: 1.02 },
+        }}
+        transition={{
+          duration: 1,
+          ease: [0.19, 1, 0.22, 1],
+        }}
+        className="absolute inset-0"
+      >
+        <img
+          src={tour.images?.[0]}
+          className="inset-0 w-full h-full object-cover scale-110 shadow-xl"
+        />
+      </motion.div>
+      <motion.section
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
+      </motion.section>
 
-        {/* متن - 50% عرض */}
-        <div className="lg:w-1/2 flex flex-col justify-center">
-          <h1 className="text-5xl font-black mb-6">{tour.title}</h1>
-          <p className="text-xl text-gray-600 mb-8">{tour.description}</p>
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <MapPin className="h-5 w-5 text-primary" />
-              <span className="text-lg">{tour.location}</span>
-            </div>
-            {/* ... سایر اطلاعات */}
-          </div>
-        </div>
+      <div className="absolute top-0 right-0 p-12">
+        <TourActions
+          isLiked={isLiked}
+          setIsLiked={setIsLiked}
+          handleShare={handleShare}
+          tour={tour}
+        />
       </div>
-    </section>
+
+      <motion.div
+        initial={{ y: 80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="absolute bottom-12 left-12 text-white"
+      >
+        <h1 className="text-6xl font-black mb-4">{tour.title}</h1>
+        <div className="flex items-center gap-2 text-white/80">
+          <MapPin size={32} />
+          مکان:
+          {tour.location}
+        </div>
+      </motion.div>
+      <motion.div
+        initial={{ y: -80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="absolute top-0 left-0 p-12 bg-gradient-to-r from-black/20 via-black/10 to-transparent text-white"
+      >
+        <Link
+          className="flex items-center gap-2"
+          href={`/${encodeURIComponent(ownerSlug)}`}
+        >
+          <p className="text-white flex flex-col gap-2">
+            <Badge
+              className="bg-black/40 text-white"
+              variant={
+                tour.owner?.verifyStatus === "APPROVED"
+                  ? "success"
+                  : "secondary"
+              }
+            >
+              {tour.owner?.verifyStatus === "APPROVED"
+                ? "✅ تأیید شده"
+                : "در انتظار تأیید"}
+            </Badge>
+            {tour.owner?.slug}@
+          </p>
+          <Avatar className="h-20 w-20 border-4 border-white shadow-lg">
+            {tour.owner?.avatar ? (
+              <AvatarImage src={tour.owner.avatar} alt={tour.owner.name} />
+            ) : null}
+            <AvatarFallback className="bg-black/50 backdrop-blur-xl text-2xl">
+              {tour.owner?.name?.[0] || "T"}
+            </AvatarFallback>
+          </Avatar>
+        </Link>
+      </motion.div>
+      <motion.div
+        initial={{ y: 80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="absolute bottom-0 right-0 p-12 bg-gradient-to-l from-black/20 via-black/10 to-transparent text-white"
+      >
+        <div>
+          <p className="text-white mb-4">
+            {tour.owner?.bio || "تورلیدر با تجربه و دارای مجوز گردشگری"}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-white border-white"
+            >
+              <Phone className="h-4 w-4 ml-2" />
+              تماس
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-white border-white"
+            >
+              <MessageCircle className="h-4 w-4 ml-2" />
+              پیام
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-white border-white"
+            >
+              <Instagram className="h-4 w-4 ml-2" />
+              اینستاگرام
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.section>
   );
 }
 

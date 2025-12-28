@@ -7,7 +7,7 @@ import ProfileHeader from "./ProfileHeader";
 import ProfileTours from "./ProfileTours";
 import ProfileStats from "./ProfileStats";
 import ProfileActions from "./ProfileActions";
-import { Skeleton } from "@/components/ui/skeleton";
+import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
 import { AlertCircle, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,14 +24,9 @@ export default function ProfilePage({ slug }) {
         setLoading(true);
         setError(null);
 
-        console.log("📡 Fetching profile for:", slug);
-
         const response = await fetch(`/api/users/${slug}`, {
           cache: "no-store",
-          headers: { Accept: "application/json" },
         });
-
-        console.log("📊 Response status:", response.status);
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -40,13 +35,7 @@ export default function ProfilePage({ slug }) {
           throw new Error(`خطای سرور: ${response.status}`);
         }
 
-        const contentType = response.headers.get("content-type");
-        if (!contentType?.includes("application/json")) {
-          throw new Error("پاسخ سرور نامعتبر است");
-        }
-
         const data = await response.json();
-        console.log("📦 API data:", data);
 
         if (!data.success) {
           throw new Error(data.message || "خطا در دریافت اطلاعات");
@@ -67,16 +56,14 @@ export default function ProfilePage({ slug }) {
     }
   }, [slug]);
 
-  // Loading State
   if (loading) {
     return <ProfileSkeleton />;
   }
 
-  // Error State
   if (error) {
     return (
-      <div className="p-4">
-        <div className="w-full text-center">
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <AlertCircle className="w-10 h-10 text-red-600" />
           </div>
@@ -92,7 +79,6 @@ export default function ProfilePage({ slug }) {
               <Home className="w-4 h-4 ml-2" />
               بازگشت به خانه
             </Button>
-
             <Button variant="outline" onClick={() => window.location.reload()}>
               تلاش مجدد
             </Button>
@@ -111,54 +97,38 @@ export default function ProfilePage({ slug }) {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <ProfileHeader profile={profile} />
+    <div className="min-h-screen mt-4">
+      <div className="mx-auto sm:px-6 lg:px-8 py-8">
+        <ProfileHeader profile={profile} tours={tours}/>
+        {/* <ProfileStats tours={tours} profile={profile} /> */}
         <ProfileActions profile={profile} slug={slug} />
-        <ProfileTours tours={tours} profile={profile} />
-        <div className="mt-12 pt-6 border-t border-gray-200 text-center">
+        <div className="mt-12">
+          {tours.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">هنوز توری ثبت نشده است</p>
+            </div>
+          ) : (
+            <ProfileTours tours={tours} profile={profile} />
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="mt-16 pt-8 border-t border-gray-200 text-center">
           <p className="text-sm text-gray-500">
-            صفحه شخصی {profile.name} | عضویت از {profile.joinDate}
+            صفحه شخصی {profile.name} |
+            {profile.createdAt && (
+              <span>
+                {" "}
+                عضویت از{" "}
+                {new Date(profile.createdAt).toLocaleDateString("fa-IR")}
+              </span>
+            )}
           </p>
-          {profile.isVerified && (
+          {profile.verifyStatus === "APPROVED" && (
             <p className="text-xs text-green-600 mt-1">
               ✅ این حساب احراز هویت شده است
             </p>
           )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// کامپوننت Skeleton برای loading
-function ProfileSkeleton() {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* هدر */}
-        <div className="flex flex-col md:flex-row items-center gap-6 mb-8">
-          <Skeleton className="w-32 h-32 rounded-full" />
-          <div className="flex-1 space-y-4">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-4 w-64" />
-          </div>
-        </div>
-
-        {/* آمار */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-xl" />
-          ))}
-        </div>
-
-        {/* تورها */}
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-32 mb-4" />
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-32 rounded-xl" />
-          ))}
         </div>
       </div>
     </div>

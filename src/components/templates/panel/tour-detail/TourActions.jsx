@@ -1,5 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { motion, usePresence } from "framer-motion";
+import { toast } from "@/components/toast";
 import {
   Tooltip,
   TooltipContent,
@@ -9,7 +11,11 @@ import {
 import { Share2, Bookmark } from "lucide-react";
 function TourActions({ handleShare, isLiked, setIsLiked }) {
   return (
-    <div className=" flex gap-2">
+    <motion.div
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="flex gap-2"
+    >
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -39,7 +45,7 @@ function TourActions({ handleShare, isLiked, setIsLiked }) {
             >
               <Bookmark
                 className={`h-5 w-5 ${
-                  isLiked ? "fill-red-500 text-red-500" : ""
+                  isLiked ? "fill-white text-white transition" : ""
                 }`}
               />
             </Button>
@@ -51,7 +57,7 @@ function TourActions({ handleShare, isLiked, setIsLiked }) {
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    </div>
+    </motion.div>
   );
 }
 

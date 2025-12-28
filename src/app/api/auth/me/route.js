@@ -1,3 +1,4 @@
+//app/api/auth/me/route.js
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
@@ -21,6 +22,7 @@ export async function GET(req) {
           id: payload.sub,
           phone: payload.phone,
           role: payload.role,
+          slug: payload.slug,
         },
       },
       { status: 200 }

@@ -50,6 +50,20 @@
       "when": 1765705747182,
       "tag": "0006_left_hiroim",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1766648225403,
+      "tag": "0007_dark_gateway",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1766840338146,
+      "tag": "0008_wooden_king_bedlam",
+      "breakpoints": true
     }
   ]
 }
