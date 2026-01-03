@@ -10,7 +10,7 @@ import ProfileActions from "./ProfileActions";
 import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
 import { AlertCircle, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { Separator } from "@/components/ui/separator";
 export default function ProfilePage({ slug }) {
   const [profile, setProfile] = useState(null);
   const [tours, setTours] = useState([]);
@@ -102,7 +102,7 @@ export default function ProfilePage({ slug }) {
         <ProfileHeader profile={profile} tours={tours}/>
         {/* <ProfileStats tours={tours} profile={profile} /> */}
         <ProfileActions profile={profile} slug={slug} />
-        <div className="mt-12">
+        <div className="mt-12 mb-4">
           {tours.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500">هنوز توری ثبت نشده است</p>
@@ -112,8 +112,8 @@ export default function ProfilePage({ slug }) {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="mt-16 pt-8 border-t border-gray-200 text-center">
+        <Separator className="bg-black/20 dark:bg-white/20"/>
+        <div className="mt-16 pt-8 text-center">
           <p className="text-sm text-gray-500">
             صفحه شخصی {profile.name} |
             {profile.createdAt && (

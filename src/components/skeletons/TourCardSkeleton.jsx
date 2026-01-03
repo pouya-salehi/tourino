@@ -4,12 +4,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TourCardSkeleton() {
   return (
-    <Card className="group relative h-[400px] overflow-hidden rounded-2xl shadow-xl">
+    <Card className="group relative h-[400px] overflow-hidden rounded-2xl shadow-xl bg-gradient-to-b from-gray-50 to-white">
       {/* Image Skeleton */}
       <Skeleton className="absolute inset-0 w-full h-full" />
 
       {/* Overlay Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
 
       {/* Avatar Skeleton - Top Right */}
       <div className="absolute top-0 right-0 p-4 flex items-center gap-2">

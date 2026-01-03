@@ -22,7 +22,7 @@ function TourActions({ handleShare, isLiked, setIsLiked }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-12 w-12 rounded-full bg-black/20 backdrop-blur-sm hover:bg-white/20 text-white"
+              className="md:h-12 md:w-12 rounded-full bg-black/20 backdrop-blur-sm hover:bg-white/20 text-white"
               onClick={handleShare}
             >
               <Share2 className="h-5 w-5" />
@@ -40,7 +40,7 @@ function TourActions({ handleShare, isLiked, setIsLiked }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-12 w-12 rounded-full bg-black/20 backdrop-blur-sm hover:bg-white/20 text-white"
+              className="md:h-12 md:w-12  rounded-full bg-black/20 backdrop-blur-sm hover:bg-white/20 text-white"
               onClick={() => setIsLiked(!isLiked)}
             >
               <Bookmark

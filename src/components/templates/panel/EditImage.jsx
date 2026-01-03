@@ -36,7 +36,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+//skeleton
+import ImageEditorSkeleton from "@/components/skeletons/ImageEditorSkeleton";
 export default function ImageEditor() {
   const [image, setImage] = useState(null);
   const [texts, setTexts] = useState([]);
@@ -45,7 +46,7 @@ export default function ImageEditor() {
   const [scale, setScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-
+  const [isLoading, setIsLoading] = useState();
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
   const previewRef = useRef(null);
@@ -308,16 +309,28 @@ export default function ImageEditor() {
       };
     }
   }, [isDragging, activeText]);
+  useEffect(() => {
+    // شبیه‌سازی لودینگ
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <ImageEditorSkeleton />;
+  }
 
   // متن فعال
   const activeTextData = texts.find((t) => t.id === activeText);
 
   return (
-    <div className="min-h-screen">
+    <div className="">
       <div className="mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <Card className="flex h-screen top-6">
+            <Card className="flex h-fit md:h-screen top-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Palette className="h-5 w-5 text-blue-600" />

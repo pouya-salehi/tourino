@@ -64,6 +64,13 @@
       "when": 1766840338146,
       "tag": "0008_wooden_king_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1767079155836,
+      "tag": "0009_bored_speedball",
+      "breakpoints": true
     }
   ]
 }

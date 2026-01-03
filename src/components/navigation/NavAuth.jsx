@@ -1,6 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
+import { e2p } from "@/lib/replaceNumber";
 import {
   UserRound,
   LogOut,
@@ -9,6 +10,7 @@ import {
   FileInput,
   House,
   CircleUserRound,
+  Tent,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -23,10 +25,8 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-
 export default function UserMenu() {
   const { user } = useAuth();
-  console.log(user);
   const [open, setOpen] = useState(false);
   const menuRef = useRef();
   const handleLogout = async () => {
@@ -47,11 +47,10 @@ export default function UserMenu() {
   const getPanel = () => {
     if (!user) return "/signin";
     if (user.role === "CLIENT") return "/client";
-    if (user.role === "OWNER") return `/${user.slug}/panel`;
-    if (user.role === "ADMIN") return "/owner";
+    if (user.role === "ADMIN") return `/${user.slug}/panel`;
+    if (user.role === "OWNER") return "/owner";
     return "/client";
   };
-
   return (
     <>
       {!user && (
@@ -81,10 +80,18 @@ export default function UserMenu() {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent open={open} align="end" className="w-64">
-              <div className="flex justify-between items-center px-2 text-gray-500 text-xs">
-                <DropdownMenuLabel>{user.phone}</DropdownMenuLabel>
+              <div className="flex justify-between items-center px-2 text-gray-500 dark:text-white text-xs">
+                <DropdownMenuLabel>{e2p(user.phone)}</DropdownMenuLabel>
                 <DropdownMenuLabel className="opacity-70">
-                  <em>{user.role}</em>
+                  <h2>
+                    {user.role === "OWNER" ? (
+                      <span>مدیرعامل</span>
+                    ) : user.role === "ADMIN" ? (
+                      <span>صاحب تور</span>
+                    ) : (
+                      <span>مشتری</span>
+                    )}
+                  </h2>
                 </DropdownMenuLabel>
               </div>
 
@@ -98,6 +105,17 @@ export default function UserMenu() {
                   >
                     <CircleUserRound size={18} />
                     حساب کاربری
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuGroup>
+                <DropdownMenuItem>
+                  <Link
+                    href={`/${user.slug}`}
+                    className="flex items-center py-2 gap-2"
+                  >
+                    <Tent size={18} />
+                    برو به صفحه اصلی تور
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>

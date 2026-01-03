@@ -14,7 +14,7 @@ export default function TourDetailsModal({ tour, open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-7xl h-[90vh] overflow-hidden p-8">
+      <DialogContent className="max-w-7xl h-[90vh] overflow-hidden p-0 py-6 md:p-8">
         <div className="flex flex-col h-full mt-4">
           <DialogTitle>
             جزئیات{" "}

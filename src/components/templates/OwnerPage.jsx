@@ -1,257 +1,163 @@
+// components/modules/owner/OwnerPage.jsx (نسخه نهایی)
 "use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-//modules
-import Pagination from "../modules/owner/ownerpage/Pagination";
-import ClientModal from "../modules/owner/ownerpage/ClientModal";
-import ClientCard from "../modules/owner/ownerpage/ClinetCard";
-import SidebarFilters from "../modules/owner/ownerpage/SidebarFilters";
-import { toast } from "react-hot-toast";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Search,
-  RefreshCcw,
-  Users,
-  CheckCircle,
-  XCircle,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
 
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import { useState, useEffect, useCallback } from "react";
+import { toast } from "../toast";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users } from "lucide-react";
 
-/* ---------------------------
-  Constants
---------------------------- */
-const DEFAULT_LIMIT = 20;
+import ClientFilters from "./owner/clients/client-modules/ClientFilter";
+import ClientCard from "./owner/clients/client-modules/ClientCard";
+import ClientModal from "./owner/clients/ClientModal";
 
-/* ---------------------------
-  Helper: debounce hook
---------------------------- */
+// هوک debounce
 function useDebounce(value, delay = 400) {
-  const [deb, setDeb] = useState(value);
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
   useEffect(() => {
-    const t = setTimeout(() => setDeb(value), delay);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => clearTimeout(timer);
   }, [value, delay]);
-  return deb;
+
+  return debouncedValue;
 }
 
-/* ---------------------------
-  Main OwnerPage
---------------------------- */
 export default function OwnerPage() {
-  // state
   const [clients, setClients] = useState([]);
-  const [tours, setTours] = useState([]);
-  const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const [selectedClientDocs, setSelectedClientDocs] = useState(null); // 👈 اینو اضافه کن
+  const [stats, setStats] = useState({});
 
   const [search, setSearch] = useState("");
-  const debSearch = useDebounce(search, 450);
-
-  const [filters, setFilters] = useState({ tourId: "all", status: "all" });
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
 
   const [page, setPage] = useState(1);
-  const [limit] = useState(DEFAULT_LIMIT);
   const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
 
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedClientId, setSelectedClientId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // fetch function (memoized)
-  const fetchClients = useCallback(
-    async (opts = {}) => {
-      setLoading(true);
-      try {
-        const q = new URLSearchParams();
-        if (debSearch) q.append("search", debSearch);
-        if (filters.tourId && filters.tourId !== "all")
-          q.append("tourId", filters.tourId);
-        if (filters.status && filters.status !== "all")
-          q.append("status", filters.status);
-        q.append("page", opts.page ?? page);
-        q.append("limit", limit);
+  const debouncedSearch = useDebounce(search, 500);
 
-        const url = `/api/owner/clients?${q.toString()}`;
+  // تابع fetch
+  const fetchClients = useCallback(async () => {
+    setLoading(true);
 
-        const res = await fetch(url, {
-          cache: "no-store",
-          credentials: "include",
-        });
-        const json = await res.json();
-        if (!res.ok || !json.success) {
-          throw new Error(json.message || "خطا در دریافت داده‌ها");
-        }
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(debouncedSearch && { search: debouncedSearch }),
+        ...(statusFilter !== "all" && { verifyStatus: statusFilter }),
+        ...(sortBy && { sort: sortBy }),
+      });
+      const response = await fetch(`/api/owner/clients?${params}`, {
+        credentials: "include",
+        cache: "no-store",
+      });
 
-        setClients(json.clients || []);
-        setTours(json.filters?.tours || []);
-        setStats(json.stats || {});
-        setTotalPages(json.pagination?.totalPages || 1);
-      } catch (err) {
-        console.error("fetchClients error:", err);
-        toast.error(err.message || "خطا در دریافت مشتری‌ها");
-      } finally {
-        setLoading(false);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "خطا در دریافت اطلاعات");
       }
-    },
-    [debSearch, filters, page, limit]
-  );
-
-  // initial + deps
+      setClients(data.data || []);
+      setStats(data.meta.stats || {});
+      setTotalPages(data.meta.pagination.totalPages || 1);
+    } catch (error) {
+      toast.error(error.message);
+      setClients([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, debouncedSearch, statusFilter, sortBy]);
   useEffect(() => {
-    // whenever search/filters/page change -> fetch
-    setPage(1); // reset page on new filter/search
-  }, [debSearch, filters]);
-
-  useEffect(() => {
-    fetchClients({ page });
-  }, [fetchClients, page]);
-
-  // actions
-  const openClient = (client) => {
-    setSelectedClient(client);
+    fetchClients();
+  }, [fetchClients]);
+console.log(clients)
+  // بازکردن مودال
+  const handleOpenClientModal = (clientId) => {
+    setSelectedClientId(clientId);
     setModalOpen(true);
   };
 
-  const closeModal = () => {
-    setSelectedClient(null);
-    setModalOpen(false);
-  };
-
-  const confirmBooking = async (client) => {
-    // optimistic UI example: call API to confirm booking
-    try {
-      const res = await fetch("/api/owner/bookings/confirm", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId: client.id }),
-      });
-      const j = await res.json();
-      if (!res.ok || !j.success) throw new Error(j.message || "خطا");
-
-      toast.success("رزرو تایید شد");
-      // refresh small: update local item
-      setClients((prev) =>
-        prev.map((c) =>
-          c.id === client.id ? { ...c, status: "CONFIRMED" } : c
-        )
-      );
-      closeModal();
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || "خطا در تایید رزرو");
-    }
-  };
-
-  const cancelBooking = async (client) => {
-    try {
-      const res = await fetch("/api/owner/bookings/cancel", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId: client.id }),
-      });
-      const j = await res.json();
-      if (!res.ok || !j.success) throw new Error(j.message || "خطا");
-
-      toast.success("رزرو لغو شد");
-      setClients((prev) =>
-        prev.map((c) =>
-          c.id === client.id ? { ...c, status: "CANCELLED" } : c
-        )
-      );
-      closeModal();
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || "خطا در لغو رزرو");
-    }
-  };
-
-  const handleRefresh = () => {
-    fetchClients({ page: 1 });
+  // خروجی اکسل
+  const exportToExcel = () => {
+    toast.success("در حال آماده‌سازی فایل اکسل...");
+    // کد تولید اکسل
   };
 
   return (
-    <div className="min-h-screen shadow-none">
-      <div className="mx-auto grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
-        <SidebarFilters
+    <div className="min-h-screen md:p-6 mt-10">
+      <div className="mx-auto">
+        {/* هدر */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">مدیریت مشتریان</h1>
+          <p className="text-gray-600 dark:text-gray-400">مدیریت و بررسی مشتریان شما</p>
+        </div>
+
+        {/* فیلترها */}
+        <ClientFilters
           search={search}
-          setSearch={setSearch}
-          tours={tours}
-          filters={filters}
-          setFilters={setFilters}
-          stats={stats}
-          onRefresh={handleRefresh}
+          onSearchChange={setSearch}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          onRefresh={fetchClients}
+          onExport={exportToExcel}
         />
 
-        <main className="rounded-lg p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-500">
-                لیست مشتری‌ها
-              </h1>
-              <span className="text-sm text-gray-500">
-                ({stats.totalClients ?? 0})
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                className="border-2 rounded-md"
-                onClick={() => fetchClients({ page: 1 })}
-              >
-                <RefreshCcw className="w-4 h-4" />
-                بروزرسانی
-              </Button>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex flex-col gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-36 rounded-lg" />
-              ))}
-            </div>
-          ) : clients.length === 0 ? (
-            <div className="text-center py-20 text-gray-500">
-              <Users className="mx-auto w-16 h-16 mb-4" />
-              <div className="text-lg">مشتری‌ای یافت نشد</div>
-              <div className="text-sm mt-2">
-                با تغییر فیلترها دوباره امتحان کنید
-              </div>
-            </div>
-          ) : (
-            <div className="">
-              <div className="flex flex-col gap-4">
-                {clients.map((c) => (
-                  <ClientCard key={c.id} client={c} onOpen={openClient} />
+        {/* لیست مشتریان */}
+        <Card className="mt-6">
+          <CardContent className="p-0">
+            {loading ? (
+              // اسکلتون
+              <div className="space-y-4 p-6">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-20 bg-gray-200 animate-pulse rounded-lg"
+                  />
                 ))}
               </div>
-            </div>
-          )}
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
-        </main>
+            ) : clients.length === 0 ? (
+              <div className="text-center py-12">
+                <Users className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+                <h3 className="text-lg font-medium text-gray-700">
+                  مشتری‌ای یافت نشد
+                </h3>
+                <p className="text-gray-500 mt-2">
+                  با تغییر فیلترها دوباره امتحان کنید
+                </p>
+              </div>
+            ) : (
+              <div className="py-1 px-4">
+                {clients.map((client) => (
+                  <ClientCard
+                    key={client.id}
+                    client={client}
+                    onViewDetails={() => handleOpenClientModal(client.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* مودال مشتری */}
       <ClientModal
         open={modalOpen}
-        onClose={closeModal}
-        user={selectedClient} // اطلاعات کاربر
-        documents={selectedClientDocs} // مدارک احراز
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedClientId(null);
+        }}
+        clientId={selectedClientId}
       />
     </div>
   );

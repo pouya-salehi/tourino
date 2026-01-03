@@ -5,22 +5,22 @@ import TourCardSkeleton from "./TourCardSkeleton";
 
 export default function ProfileSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="mt-10">
+      <div className="mx-auto px-4 lg:px-8 ">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row items-center gap-8 mb-12">
+        <div className="flex flex-col lg:flex-row items-center gap-2 mb-12 ">
           {/* Avatar */}
-          <Skeleton className="w-40 h-40 rounded-full" />
+          <Skeleton className="w-40 h-40 rounded-full bg-gradient-to-b from-gray-50 to-white" />
 
           {/* Info */}
           <div className="flex-1 space-y-4">
-            <Skeleton className="h-10 w-64" />
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-4 w-96" />
+            <Skeleton className="h-10 w-64 bg-gradient-to-b from-gray-50 to-white" />
+            <Skeleton className="h-4 w-48 bg-gradient-to-b from-gray-50 to-white" />
+            <Skeleton className="h-4 w-64 bg-gradient-to-b from-gray-50 to-white" />
             <div className="flex gap-4 pt-4">
-              <Skeleton className="h-10 w-32 rounded-lg" />
-              <Skeleton className="h-10 w-32 rounded-lg" />
-              <Skeleton className="h-10 w-32 rounded-lg" />
+              <Skeleton className="h-10 w-22 rounded-lg bg-gradient-to-b from-gray-50 to-white" />
+              <Skeleton className="h-10 w-22 rounded-lg bg-gradient-to-b from-gray-50 to-white" />
+              <Skeleton className="h-10 w-22 rounded-lg bg-gradient-to-b from-gray-50 to-white" />
             </div>
           </div>
         </div>
@@ -43,8 +43,8 @@ export default function ProfileSkeleton() {
         {/* Tours Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-10 w-32 rounded-lg" />
+            <Skeleton className="h-8 w-48 bg-gradient-to-b from-gray-50 to-white" />
+            <Skeleton className="h-10 w-32 rounded-lg bg-gradient-to-b from-gray-50 to-white" />
           </div>
 
           {/* Tour Cards Grid - grid-cols-4 */}

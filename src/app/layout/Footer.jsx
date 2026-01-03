@@ -1,4 +1,11 @@
-import { Instagram, TentTree, Mail, Phone, MapPin, Youtube } from "lucide-react";
+import {
+  Instagram,
+  TentTree,
+  Mail,
+  Phone,
+  MapPin,
+  Youtube,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 export default function Footer() {
@@ -25,11 +32,12 @@ export default function Footer() {
   const contactInfo = [{ icon: Mail, text: "cooperstudio2024@gmail.com" }];
 
   return (
-    <footer className="relative overflow-hidden">
+    <footer className="relative overflow-hidden mt-4">
+      <Separator className="block md:hidden bg-black/20 dark:bg-white/20" />
       <div className="relative z-10 mx-auto px-6 py-16">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand column */}
-          <div className="md:col-span-1">
+          <div className="md:col-span-1 flex flex-col items-center md:items-start ">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
                 <TentTree className="w-6 h-6 text-white" />
@@ -38,7 +46,10 @@ export default function Footer() {
                 <Link href="/" className="font-black text-2xl text-indigo-600">
                   GotoTour
                 </Link>
-                <Link href="https://couper.ir" className="text-xs text-gray-700 dark:text-white font-semibold tracking-widest">
+                <Link
+                  href="https://couper.ir"
+                  className="text-xs text-gray-700 dark:text-white font-semibold tracking-widest"
+                >
                   By CouperStudio
                 </Link>
               </div>
@@ -60,10 +71,11 @@ export default function Footer() {
               ))}
             </div>
           </div>
-
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-bold text-gray-800 dark:text-white mb-6 text-lg">لینک ها</h3>
+          <Separator className="block md:hidden" />
+          <div className="md:col-span-1 flex flex-col items-center md:items-start ">
+            <h3 className="font-bold text-gray-800 dark:text-white mb-6 text-lg">
+              لینک ها
+            </h3>
             <ul className="space-y-3">
               {quickLinks.map((link, index) => (
                 <li key={index}>
@@ -80,7 +92,7 @@ export default function Footer() {
           </div>
 
           {/* Contact Info */}
-          <div>
+          <div className="md:col-span-1 flex flex-col items-center md:items-start ">
             <h3 className="font-bold text-gray-800 mb-6 text-lg dark:text-white">
               با ما در تماس باشید
             </h3>
@@ -88,7 +100,9 @@ export default function Footer() {
               {contactInfo.map((info, index) => (
                 <li key={index} className="flex items-start gap-3 text-sm">
                   <info.icon className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-600 dark:text-white">{info.text}</span>
+                  <span className="text-gray-600 dark:text-white">
+                    {info.text}
+                  </span>
                 </li>
               ))}
             </ul>

@@ -46,7 +46,7 @@ export default function TourDetailPage({ tour }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen py-12 px-4"
+      className="min-h-screen mt-12 md:px-4"
     >
       <TourHeader
         tour={tour}

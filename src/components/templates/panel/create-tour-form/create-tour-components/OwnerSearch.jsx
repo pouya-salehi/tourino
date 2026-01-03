@@ -378,7 +378,6 @@ export default function OwnerSearch({
 
       {/* راهنما */}
       <div className="text-xs text-gray-500 space-y-1">
-        <p>💡 مالک تور را جستجو و انتخاب کنید</p>
         {maxSelect > 1 && (
           <p>🔍 می‌توانید تا {maxSelect} برگزارکننده انتخاب کنید</p>
         )}

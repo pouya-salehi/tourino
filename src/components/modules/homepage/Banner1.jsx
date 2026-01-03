@@ -14,7 +14,7 @@ function Banner() {
         stiffness: 120,
         damping: 12,
       }}
-      className="text-center md:text-start flex items-center justify-between w-full gap-8 mt-16 h-[80vh] rounded-4xl dark:shadow-none dark:border md:shadow-lg shadow-none"
+      className="text-center md:text-start flex items-center justify-between w-full gap-8 mt-16 h-[60vh] md:h-[80vh] rounded-4xl dark:shadow-none dark:border-none md:shadow-lg shadow-none"
     >
       {/* متن */}
       <div className="w-full flex flex-col items-center">

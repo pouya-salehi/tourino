@@ -180,17 +180,28 @@ export const bookings = pgTable("bookings", {
 export const verificationDocuments = pgTable("verification_documents", {
   id: serial("id").primaryKey(),
   ownerId: integer("owner_id")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "CASCADE" }) // ✅ CASCADE اضافه کن
     .notNull(),
 
   // پرونده مالک تور
   licenseImage: text("license_image").notNull(),
   nationalCard: text("national_card").notNull(),
 
+  additionalDocs: text("additional_docs").array(),
+  signedContract: text("signed_contract"),
+
   status: verifyEnum("verify_status").default("PENDING"),
+
+  reviewedAt: timestamp("reviewed_at"),
+  reviewedBy: integer("reviewed_by").references(() => users.id),
+
   adminNote: text("admin_note"),
 
+  requestNumber: text("request_number").unique(),
+  version: integer("version").default(1),
+
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 // -------------------- FOLLOW --------------------
 export const follows = pgTable("follows", {

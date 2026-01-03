@@ -1,6 +1,13 @@
 "use client";
 
-import { Calendar, Users, MapPin, DollarSign, Hash } from "lucide-react";
+import {
+  Calendar,
+  Users,
+  MapPin,
+  DollarSign,
+  Hash,
+  ListCheck,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -12,6 +19,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Popover,
   PopoverContent,
@@ -94,45 +110,66 @@ export default function BasicTab({
           </div>
 
           {/* قیمت و نفرات */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <Label htmlFor="price">
-                <DollarSign className="inline h-4 w-4 mr-1" />
-                قیمت (تومان) *
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                min="0"
-                value={formData.price}
-                onChange={(e) => handleChange("price", e.target.value)}
-                placeholder="مثال: 1500000"
-                required
-              />
-              {formData.price && (
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p>💰 {formatPriceForUI(formData.price)?.numeric}</p>
-                  <p className="text-xs text-gray-500">
-                    {formatPriceForUI(formData.price)?.words}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="maxPeople">
-                <Users className="inline h-4 w-4 mr-1" />
-                حداکثر نفرات
-              </Label>
-              <Input
-                id="maxPeople"
-                type="number"
-                min="1"
-                value={formData.maxPeople}
-                onChange={(e) => handleChange("maxPeople", e.target.value)}
-                placeholder="مثال: 20"
-              />
-            </div>
+          <div className="space-y-3">
+            <Label htmlFor="price">
+              <DollarSign className="inline h-4 w-4 mr-1" />
+              قیمت (تومان) *
+            </Label>
+            <Input
+              id="price"
+              type="number"
+              min="0"
+              value={formData.price}
+              onChange={(e) => handleChange("price", e.target.value)}
+              placeholder="مثال: 1500000"
+              required
+            />
+            {formData.price && (
+              <div className="text-sm text-gray-600 space-y-1">
+                <p>💰 {formatPriceForUI(formData.price)?.numeric}</p>
+                <p className="text-xs text-gray-500">
+                  {formatPriceForUI(formData.price)?.words}
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="space-y-3">
+            <Label htmlFor="maxPeople">
+              <Users className="inline h-4 w-4 mr-1" />
+              حداکثر نفرات
+            </Label>
+            <Input
+              id="maxPeople"
+              type="number"
+              min="1"
+              value={formData.maxPeople}
+              onChange={(e) => handleChange("maxPeople", e.target.value)}
+              placeholder="مثال: 20"
+            />
+          </div>
+          <div className="space-y-3">
+            <Label htmlFor="category">
+              <ListCheck className="inline h-4 w-4 mr-1" />
+              دسته بندی تور
+            </Label>
+            <Select>
+              <SelectTrigger id="category" className="w-full">
+                <SelectValue placeholder="دسته بندی تور را انتخاب کنید..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>دسته بندی ها</SelectLabel>
+                  <SelectItem value="off-road">آفرود</SelectItem>
+                  <SelectItem value="safary">سافاری</SelectItem>
+                  <SelectItem value="mountain">کوهنوردی</SelectItem>
+                  <SelectItem value="dareh">دره نوردی</SelectItem>
+                  <SelectItem value="climbing">صخره نوردی</SelectItem>
+                  <SelectItem value="camping">کمپینگ</SelectItem>
+                  <SelectItem value="rofting">رفتینگ</SelectItem>
+                  <SelectItem value="traveling">مسافرتی</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

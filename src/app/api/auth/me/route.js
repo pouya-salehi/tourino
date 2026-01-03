@@ -23,6 +23,7 @@ export async function GET(req) {
           phone: payload.phone,
           role: payload.role,
           slug: payload.slug,
+          verifyStatus: payload.verifyStatus,
         },
       },
       { status: 200 }

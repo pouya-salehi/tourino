@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { Search, UsersRound, House, StickyNote } from "lucide-react";
+import { Separator } from "../ui/separator";
 export default function NavLinks({ onClick, mobile = false }) {
   const router = useRouter();
 
@@ -19,9 +20,9 @@ export default function NavLinks({ onClick, mobile = false }) {
 
   if (mobile) {
     return (
-      <ul className="flex flex-row items-center gap-6">
+      <ul className="flex flex-col gap-6">
         {links.map((lnk, idx) => (
-          <li key={idx} className=" group list-none">
+          <li key={idx} className="group px-2 list-none">
             <Link
               href={lnk.href}
               className="text-gray-500 font-bold hover:text-gray-800 block py-2"
@@ -29,25 +30,29 @@ export default function NavLinks({ onClick, mobile = false }) {
             >
               {lnk.title}
             </Link>
-            {lnk.subLinks && lnk.subLinks.length > 0 && (
-              <div className="absolute right-0 top-full mt-2 min-w-[200px] rounded-md bg-black shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-40 border">
-                <ul className="p-4 space-y-2">
-                  {lnk.subLinks.map((sub, sidx) => (
-                    <li key={sidx} className="list-none">
-                      <Link
-                        href={sub.href}
-                        className="text-gray-600 hover:text-blue-600 cursor-pointer text-sm transition-colors block py-1"
-                        onClick={onClick}
-                      >
-                        {sub.title}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </li>
         ))}
+        <Separator />
+        {/* 👇 فقط برای موبایل */}
+        <li className="flex flex-col gap-2 mt-4">
+          <Button
+            href="/profiles"
+            className="cursor-pointer bg-white text-gray-500"
+            onClick={onClick}
+          >
+            <UsersRound />
+            <Link href="/profiles">پروفایل کاربران</Link>
+          </Button>
+
+          <Button
+            href="/tours"
+            className="cursor-pointer px-8"
+            onClick={onClick}
+          >
+            <Search />
+            <Link href="/tours">جستجوی تور</Link>
+          </Button>
+        </li>
       </ul>
     );
   }

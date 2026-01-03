@@ -54,40 +54,42 @@ export default function ProfileActions({ profile, slug }) {
     <div className="flex mb-8">
       <div className="flex flex-wrap gap-3 justify-between lg:justify-between w-full">
         {/* اکشن‌های عمومی */}
-        <div className="flex flex-wrap gap-3">
-          {profile.phone && (
+        {!isOwner && (
+          <div className="grid grid-cols-3 flex-wrap gap-3">
+            {profile.phone && (
+              <Button
+                onClick={handleCall}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Phone className="w-4 h-4 ml-2" />
+                تماس
+              </Button>
+            )}
+
             <Button
-              onClick={handleCall}
-              className="bg-green-600 hover:bg-green-700"
+              onClick={handleMessage}
+              variant="outline"
+              className="bg-white border-none dark:bg-transparent  dark:text-white hover:bg-blue-50"
             >
-              <Phone className="w-4 h-4 ml-2" />
-              تماس
+              <MessageSquare className="w-4 h-4 ml-2" />
+              پیام
             </Button>
-          )}
 
-          <Button
-            onClick={handleMessage}
-            variant="outline"
-            className="bg-white border-none hover:bg-blue-50"
-          >
-            <MessageSquare className="w-4 h-4 ml-2" />
-            پیام
-          </Button>
-
-          <Button
-            onClick={handleShare}
-            variant="outline"
-            className="bg-white border-none hover:bg-purple-50"
-          >
-            <Share2 className="w-4 h-4 ml-2" />
-            اشتراک‌گذاری
-          </Button>
-        </div>
+            <Button
+              onClick={handleShare}
+              variant="outline"
+              className="bg-white border-none dark:bg-transparent dark:text-white hover:bg-purple-50"
+            >
+              <Share2 className="w-4 h-4 ml-2" />
+              اشتراک‌گذاری
+            </Button>
+          </div>
+        )}
 
         {/* اکشن‌های مخصوص مالک */}
         <div>
           {isOwner && (
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <Button
                 onClick={handleGoToPanel}
                 className=" bg-gradient-to-r from-indigo-500 to-purple-500"

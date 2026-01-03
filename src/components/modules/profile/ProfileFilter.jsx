@@ -10,9 +10,8 @@ import {
 import { Input } from "@/components/ui/input";
 function ProfileFilter() {
   return (
-    <div className="flex gap-4 items-center p-4">
-      <h2>جستجوی پیشرفته</h2>
-      <Input className="w-lg" placeholder="جستجوی پروفایل..." />
+    <div className="flex gap-4 items-center mt-4">
+      <Input className="w-sm" placeholder="جستجوی پروفایل..." />
     </div>
   );
 }

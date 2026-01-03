@@ -10,7 +10,7 @@ export default function ModalList({ modals, handleDelete }) {
       <div className="space-y-3">
         {modals.map((item) => (
           <div
-            key={item._id}
+            key={item.id}
             className="flex justify-between items-center text-gray-500 p-3 rounded-lg shadow-sm hover:shadow-md transition"
           >
             <span className="font-bold text-gray-700 truncate w-48">

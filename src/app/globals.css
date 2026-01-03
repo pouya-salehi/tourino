@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @custom-variant dark (&:is(.dark *));
@@ -156,9 +157,15 @@ input {
 .animate-loading {
   animation: loading 1.5s ease-in-out infinite;
 }
-*{
-    transition: background-color 0.5s ease, color 0.3s ease;
+
+* {
+  transition: background-color 0.5s ease, color 0.3s ease;
 }
-.bannerBackground{
-  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70% ;
+
+.bannerBackground {
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+.brand {
+  font-family: "Lobster", sans-serif;
 }
